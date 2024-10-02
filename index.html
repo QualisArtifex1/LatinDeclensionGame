@@ -25,10 +25,19 @@
         }
 
         button {
-            padding: 6px 12px;
+            padding: 10px 20px;
             margin: 5px;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
+            border: none;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
         }
 
         /* Progress Bar */
@@ -172,6 +181,24 @@
                 font-size: 16px;
                 padding: 8px;
             }
+
+            button {
+                width: 80%;
+                font-size: 18px;
+                padding: 12px 0;
+            }
+
+            #timer {
+                font-size: 18px;
+            }
+
+            #high-score {
+                font-size: 18px;
+            }
+
+            #feedback-message {
+                font-size: 18px;
+            }
         }
 
         /* Modal Styles */
@@ -179,7 +206,7 @@
             display: block;
             position: fixed;
             z-index: 999;
-            padding-top: 100px;
+            padding-top: 50px;
             left: 0;
             top: 0;
             width: 100%;
@@ -193,18 +220,25 @@
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 80%;
+            width: 90%;
             max-width: 500px;
+            border-radius: 10px;
         }
 
         .modal h2 {
             text-align: center;
+            margin-bottom: 20px;
         }
 
         .modal label {
             display: block;
             margin-bottom: 10px;
             font-size: 16px;
+        }
+
+        .version-selection {
+            margin-bottom: 20px;
+            text-align: center;
         }
 
         .container {
@@ -220,6 +254,7 @@
 
         .endings h2 {
             text-align: center;
+            margin-bottom: 10px;
         }
 
         #endings-container {
@@ -232,7 +267,7 @@
             background-color: #f0f0f0;
             padding: 4px;
             text-align: center;
-            cursor: move;
+            cursor: grab;
             border: 1px solid #ccc;
             font-size: 14px;
             font-weight: bold; /* Make endings bold */
@@ -240,6 +275,7 @@
             transition: transform 0.2s, background-color 0.2s;
             position: relative;
             overflow: hidden;
+            border-radius: 5px;
         }
 
         .ending.hide {
@@ -337,12 +373,21 @@
             }
         }
 
+        /* Cloning Style for Mobile Dragging */
+        .dragging-clone {
+            opacity: 0.7;
+            pointer-events: none;
+            position: absolute;
+            z-index: 1000;
+            border: 2px dashed #555;
+            background-color: #fff;
+        }
     </style>
 </head>
 <body>
     <h1>Latin Noun Declension Chart</h1>
 
-    <!-- Modal for Declension Selection -->
+    <!-- Modal for Declension Selection and Version Choice -->
     <div id="declension-modal" class="modal">
         <div class="modal-content">
             <h2>Select Declensions</h2>
@@ -355,6 +400,12 @@
                 <label><input type="checkbox" name="declensions" value="5" checked> 4th Declension</label>
                 <label><input type="checkbox" name="declensions" value="6" checked> 4th Declension Neuter</label>
                 <label><input type="checkbox" name="declensions" value="7" checked> 5th Declension</label>
+                
+                <!-- Version Selection Checkbox -->
+                <div class="version-selection">
+                    <label><input type="checkbox" id="mobile-version-checkbox"> Mobile Version</label>
+                </div>
+                
                 <div class="buttons">
                     <button type="button" id="modal-start-button">Start</button>
                 </div>
@@ -454,6 +505,7 @@
             let shuffledEndings = [];
             let timerInterval = null;
             let elapsedTime = 0;
+            let isMobileVersion = false;
 
             const endingsContainer = document.getElementById('endings-container');
             const timerDisplay = document.getElementById('timer');
@@ -471,6 +523,8 @@
                     return;
                 }
                 selectedDeclensions = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                const mobileCheckbox = document.getElementById('mobile-version-checkbox');
+                isMobileVersion = mobileCheckbox.checked;
                 modal.style.display = 'none';
                 initializeGame();
                 startGame();
@@ -505,10 +559,18 @@
                         td.setAttribute('data-row', rowIndex);
                         td.setAttribute('data-col', colIndex);
 
+                        // Add event listeners for drag-and-drop
                         td.addEventListener('dragover', dragOver);
                         td.addEventListener('dragenter', dragEnter);
                         td.addEventListener('dragleave', dragLeave);
                         td.addEventListener('drop', drop);
+
+                        // For mobile: add touch events with correct function references
+                        if (isMobileVersion) {
+                            td.addEventListener('touchstart', mobileDragStart, { passive: false });
+                            td.addEventListener('touchmove', mobileDragMove, { passive: false });
+                            td.addEventListener('touchend', mobileDragEnd, { passive: false });
+                        }
 
                         tr.appendChild(td);
                     });
@@ -525,8 +587,16 @@
                     endingDiv.setAttribute('draggable', 'true');
                     endingDiv.setAttribute('id', 'ending-' + index);
 
+                    // Add event listeners for drag-and-drop
                     endingDiv.addEventListener('dragstart', dragStart);
                     endingDiv.addEventListener('dragend', dragEnd);
+
+                    // For mobile: add touch events
+                    if (isMobileVersion) {
+                        endingDiv.addEventListener('touchstart', mobileDragStart, { passive: false });
+                        endingDiv.addEventListener('touchmove', mobileDragMove, { passive: false });
+                        endingDiv.addEventListener('touchend', mobileDragEnd, { passive: false });
+                    }
 
                     endingsContainer.appendChild(endingDiv);
                 });
@@ -569,7 +639,7 @@
                 document.getElementById('feedback-message').textContent = "Let's get started!";
                 document.getElementById('progress-bar').style.width = '0%';
 
-                // Get high score
+                // Get high score after initializing game
                 getHighScore();
 
                 // Start timer
@@ -627,6 +697,7 @@
             }
 
             function drop(e) {
+                e.preventDefault();
                 e.target.classList.remove('drag-over');
 
                 // Get the draggable element
@@ -642,6 +713,91 @@
                     e.target.appendChild(draggable);
                     draggable.classList.remove('hide');
                 }
+            }
+
+            // Mobile Drag-and-Drop Implementation
+            let touchDraggedElement = null;
+            let touchOffsetX = 0;
+            let touchOffsetY = 0;
+            let currentDropzone = null;
+            let draggingClone = null;
+
+            function mobileDragStart(e) {
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+                const target = e.target;
+
+                // Ensure the touched element is an ending
+                if (!target.classList.contains('ending')) return;
+
+                touchDraggedElement = target;
+                const rect = target.getBoundingClientRect();
+                touchOffsetX = touch.clientX - rect.left;
+                touchOffsetY = touch.clientY - rect.top;
+
+                // Create a clone for dragging effect
+                target.classList.add('hide');
+                draggingClone = target.cloneNode(true);
+                draggingClone.classList.add('dragging-clone');
+                draggingClone.style.left = `${touch.clientX - touchOffsetX}px`;
+                draggingClone.style.top = `${touch.clientY - touchOffsetY}px`;
+                document.body.appendChild(draggingClone);
+            }
+
+            function mobileDragMove(e) {
+                if (!touchDraggedElement) return;
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+
+                if (draggingClone) {
+                    draggingClone.style.left = `${touch.clientX - touchOffsetX}px`;
+                    draggingClone.style.top = `${touch.clientY - touchOffsetY}px`;
+                }
+
+                // Highlight dropzones under touch
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const dropzone = elementBelow && elementBelow.classList.contains('dropzone') ? elementBelow : null;
+
+                if (currentDropzone && currentDropzone !== dropzone) {
+                    currentDropzone.classList.remove('drag-over');
+                }
+
+                if (dropzone && currentDropzone !== dropzone) {
+                    dropzone.classList.add('drag-over');
+                    currentDropzone = dropzone;
+                } else if (!dropzone && currentDropzone) {
+                    currentDropzone.classList.remove('drag-over');
+                    currentDropzone = null;
+                }
+            }
+
+            function mobileDragEnd(e) {
+                if (!touchDraggedElement) return;
+                e.preventDefault();
+                const touch = e.changedTouches[0];
+
+                // Remove the clone
+                if (draggingClone) {
+                    document.body.removeChild(draggingClone);
+                    draggingClone = null;
+                }
+
+                if (currentDropzone) {
+                    // Remove any existing child in the dropzone
+                    if (currentDropzone.firstChild && currentDropzone.firstChild !== touchDraggedElement) {
+                        endingsContainer.appendChild(currentDropzone.firstChild);
+                    }
+                    currentDropzone.appendChild(touchDraggedElement);
+                    touchDraggedElement.classList.remove('hide');
+                    currentDropzone.classList.remove('drag-over');
+                } else {
+                    // Return to original container if not dropped on a dropzone
+                    endingsContainer.appendChild(touchDraggedElement);
+                    touchDraggedElement.classList.remove('hide');
+                }
+
+                touchDraggedElement = null;
+                currentDropzone = null;
             }
 
             function playSound(soundId) {
@@ -784,19 +940,27 @@
             }
 
             function getHighScore() {
-                const highScore = localStorage.getItem('bestTime');
-                if (highScore) {
-                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(highScore)}`;
+                let declensionKey = selectedDeclensions.join('_') + (isMobileVersion ? '_mobile' : '_desktop');
+                const highScoreData = localStorage.getItem('bestTime_' + declensionKey);
+                if (highScoreData) {
+                    const highScoreObj = JSON.parse(highScoreData);
+                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(highScoreObj.time)} (Declensions: ${highScoreObj.declensions.map(d => declensionLabels[d]).join(', ')}, Version: ${isMobileVersion ? 'Mobile' : 'Desktop'})`;
                 } else {
                     document.getElementById('high-score').textContent = `Best Time: --`;
                 }
             }
 
             function updateHighScore() {
-                const highScore = localStorage.getItem('bestTime');
-                if (!highScore || elapsedTime < parseInt(highScore)) {
-                    localStorage.setItem('bestTime', elapsedTime);
-                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(elapsedTime)}`;
+                let declensionKey = selectedDeclensions.join('_') + (isMobileVersion ? '_mobile' : '_desktop');
+                const highScoreData = localStorage.getItem('bestTime_' + declensionKey);
+                if (!highScoreData || elapsedTime < JSON.parse(highScoreData).time) {
+                    const highScoreObj = {
+                        time: elapsedTime,
+                        declensions: selectedDeclensions,
+                        version: isMobileVersion ? 'Mobile' : 'Desktop'
+                    };
+                    localStorage.setItem('bestTime_' + declensionKey, JSON.stringify(highScoreObj));
+                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(elapsedTime)} (Declensions: ${selectedDeclensions.map(d => declensionLabels[d]).join(', ')}, Version: ${isMobileVersion ? 'Mobile' : 'Desktop'})`;
                     alert('New Best Time!');
                 }
             }
@@ -807,9 +971,8 @@
             });
             document.getElementById('check-button').addEventListener('click', checkAnswers);
 
-            // Show the modal on page load and get high score
+            // Show the modal on page load
             modal.style.display = 'block';
-            getHighScore();
         });
     </script>
 </body>
