@@ -22,10 +22,6 @@
         .buttons {
             text-align: center;
             margin-bottom: 10px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 10px;
         }
 
         button {
@@ -172,10 +168,6 @@
 
         /* Responsive Design Enhancements */
         @media (max-width: 600px) {
-            body.mobile {
-                margin: 10px;
-            }
-
             .container {
                 flex-direction: column;
             }
@@ -185,13 +177,10 @@
                 margin-bottom: 20px;
             }
 
-            .endings h2 {
-                font-size: 20px; /* Increased font size */
-            }
-
             .ending {
                 font-size: 18px; /* Increased font size */
                 padding: 12px;    /* Increased padding */
+                min-height: 50px; /* Increased height */
             }
 
             button {
@@ -214,33 +203,29 @@
 
             /* Adjust table font size for mobile */
             table {
-                font-size: 14px;
+                font-size: 14px; /* Increased table text size */
             }
 
             th, td {
-                padding: 8px;
-                min-width: 50px;
-                height: 40px;
+                padding: 8px; /* Increased padding */
+                min-width: 50px; /* Increased width */
+                height: 40px; /* Increased height */
             }
 
             /* Reposition buttons for mobile */
             .buttons {
+                display: flex;
                 flex-direction: column;
                 align-items: center;
-                position: fixed;
-                bottom: 10px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: rgba(255, 255, 255, 0.9);
-                padding: 10px;
-                border-radius: 10px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                z-index: 1000;
             }
 
-            /* Ensure content doesn't get hidden behind fixed buttons */
-            .declension-table, .endings {
-                margin-bottom: 80px; /* Space for fixed buttons */
+            #check-button {
+                margin-top: 10px;
+            }
+
+            #clear-high-score-button {
+                margin-top: 10px;
+                background-color: #f44336; /* Red color for clear button */
             }
         }
 
@@ -433,6 +418,7 @@
         .mobile .ending {
             font-size: 18px; /* Larger font */
             padding: 12px;    /* More padding */
+            min-height: 50px; /* Increased height */
         }
 
         .mobile button {
@@ -452,32 +438,26 @@
         }
 
         .mobile th, .mobile td {
-            padding: 8px;
-            min-width: 50px;
-            height: 40px;
+            padding: 8px; /* Increased padding */
+            min-width: 50px; /* Increased width */
+            height: 40px; /* Increased height */
         }
 
         /* Reposition buttons for mobile */
-        @media (max-width: 600px) {
-            .buttons {
-                flex-direction: column;
-                align-items: center;
-                position: fixed;
-                bottom: 10px;
-                left: 50%;
-                transform: translateX(-50%);
-                background-color: rgba(255, 255, 255, 0.9);
-                padding: 10px;
-                border-radius: 10px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                z-index: 1000;
-                width: 90%;
-            }
+        .mobile .buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-            /* Ensure content doesn't get hidden behind fixed buttons */
-            .declension-table, .endings {
-                margin-bottom: 100px; /* Increased space for fixed buttons */
-            }
+        .mobile #check-button,
+        .mobile #clear-high-score-button {
+            margin-top: 10px;
+            width: 80%;
+        }
+
+        .mobile #clear-high-score-button {
+            background-color: #f44336; /* Red color for clear button */
         }
     </style>
 </head>
@@ -513,7 +493,7 @@
     <div class="buttons">
         <button id="start-button">Restart</button>
         <button id="check-button">Check Answers</button>
-        <button id="clear-high-score-button">Clear High Score</button>
+        <button id="clear-high-score-button">Clear High Score</button> <!-- New Clear High Score Button -->
     </div>
 
     <!-- Progress Bar -->
@@ -609,8 +589,6 @@
             const timerDisplay = document.getElementById('timer');
             const tableHeader = document.getElementById('table-header');
             const tableBody = document.getElementById('table-body');
-            const highScoreDisplay = document.getElementById('high-score');
-            const feedbackMessage = document.getElementById('feedback-message');
 
             // Show Modal
             const modal = document.getElementById('declension-modal');
@@ -744,7 +722,7 @@
                 updateTimerDisplay();
 
                 // Reset feedback message and progress bar
-                feedbackMessage.textContent = "Let's get started!";
+                document.getElementById('feedback-message').textContent = "Let's get started!";
                 document.getElementById('progress-bar').style.width = '0%';
 
                 // Get high score after initializing game
@@ -847,8 +825,13 @@
                 target.classList.add('hide');
                 draggingClone = target.cloneNode(true);
                 draggingClone.classList.add('dragging-clone');
-                draggingClone.style.left = `${touch.clientX - touchOffsetX}px`;
-                draggingClone.style.top = `${touch.clientY - touchOffsetY}px`;
+                // Position the clone so that its center is under the finger
+                const cloneWidth = rect.width * 1.2; // 1.2 scale as per CSS
+                const cloneHeight = rect.height * 1.2;
+                draggingClone.style.width = `${cloneWidth}px`;
+                draggingClone.style.height = `${cloneHeight}px`;
+                draggingClone.style.left = `${touch.clientX - (cloneWidth / 2)}px`;
+                draggingClone.style.top = `${touch.clientY - (cloneHeight / 2)}px`;
                 document.body.appendChild(draggingClone);
             }
 
@@ -858,8 +841,10 @@
                 const touch = e.changedTouches[0];
 
                 if (draggingClone) {
-                    draggingClone.style.left = `${touch.clientX - touchOffsetX}px`;
-                    draggingClone.style.top = `${touch.clientY - touchOffsetY}px`;
+                    const cloneWidth = draggingClone.getBoundingClientRect().width;
+                    const cloneHeight = draggingClone.getBoundingClientRect().height;
+                    draggingClone.style.left = `${touch.clientX - (cloneWidth / 2)}px`;
+                    draggingClone.style.top = `${touch.clientY - (cloneHeight / 2)}px`;
                 }
 
                 // Highlight dropzones under touch
@@ -967,6 +952,7 @@
                 document.getElementById('progress-bar').style.width = progressPercent + '%';
 
                 // Update feedback message
+                const feedbackMessage = document.getElementById('feedback-message');
                 if (progressPercent === 100) {
                     feedbackMessage.textContent = "All correct! Well done!";
                 } else if (progressPercent >= 75) {
@@ -1051,9 +1037,9 @@
                 const highScoreData = localStorage.getItem('bestTime_' + declensionKey);
                 if (highScoreData) {
                     const highScoreObj = JSON.parse(highScoreData);
-                    highScoreDisplay.textContent = `Best Time: ${formatTime(highScoreObj.time)} (Declensions: ${highScoreObj.declensions.map(d => declensionLabels[d]).join(', ')}, Version: ${highScoreObj.version})`;
+                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(highScoreObj.time)} (Declensions: ${highScoreObj.declensions.map(d => declensionLabels[d]).join(', ')}, Version: ${highScoreObj.version})`;
                 } else {
-                    highScoreDisplay.textContent = `Best Time: --`;
+                    document.getElementById('high-score').textContent = `Best Time: --`;
                 }
             }
 
@@ -1067,9 +1053,16 @@
                         version: isMobileVersion ? 'Mobile' : 'Desktop'
                     };
                     localStorage.setItem('bestTime_' + declensionKey, JSON.stringify(highScoreObj));
-                    highScoreDisplay.textContent = `Best Time: ${formatTime(elapsedTime)} (Declensions: ${selectedDeclensions.map(d => declensionLabels[d]).join(', ')}, Version: ${highScoreObj.version})`;
+                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(elapsedTime)} (Declensions: ${selectedDeclensions.map(d => declensionLabels[d]).join(', ')}, Version: ${highScoreObj.version})`;
                     alert('New Best Time!');
                 }
+            }
+
+            function clearHighScore() {
+                let declensionKey = selectedDeclensions.join('_') + (isMobileVersion ? '_mobile' : '_desktop');
+                localStorage.removeItem('bestTime_' + declensionKey);
+                document.getElementById('high-score').textContent = `Best Time: --`;
+                alert('High Score Cleared!');
             }
 
             // Event listeners for buttons
@@ -1077,21 +1070,7 @@
                 modal.style.display = 'block';
             });
             document.getElementById('check-button').addEventListener('click', checkAnswers);
-            document.getElementById('clear-high-score-button').addEventListener('click', clearHighScore);
-
-            // Clear High Score Function
-            function clearHighScore() {
-                if (confirm("Are you sure you want to clear the high scores?")) {
-                    // Iterate through localStorage and remove relevant keys
-                    for (let key in localStorage) {
-                        if (key.startsWith('bestTime_')) {
-                            localStorage.removeItem(key);
-                        }
-                    }
-                    highScoreDisplay.textContent = `Best Time: --`;
-                    alert('High scores have been cleared.');
-                }
-            }
+            document.getElementById('clear-high-score-button').addEventListener('click', clearHighScore); // New Event Listener
 
             // Show the modal on page load
             modal.style.display = 'block';
