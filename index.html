@@ -22,6 +22,9 @@
         .buttons {
             text-align: center;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         button {
@@ -181,6 +184,12 @@
                 font-size: 18px; /* Increased font size */
                 padding: 12px;    /* Increased padding */
                 min-height: 50px; /* Increased height */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             button {
@@ -201,15 +210,16 @@
                 font-size: 18px;
             }
 
-            /* Adjust table font size for mobile */
+            /* Adjust table font size and cell size for mobile */
             table {
                 font-size: 14px; /* Increased table text size */
             }
 
             th, td {
                 padding: 8px; /* Increased padding */
-                min-width: 50px; /* Increased width */
-                height: 40px; /* Increased height */
+                min-width: 60px; /* Increased width */
+                height: 50px; /* Increased height */
+                word-wrap: break-word; /* Allow text to wrap */
             }
 
             /* Reposition buttons for mobile */
@@ -219,13 +229,43 @@
                 align-items: center;
             }
 
-            #check-button {
+            #check-button,
+            #clear-high-score-button {
                 margin-top: 10px;
+                width: 80%;
             }
 
             #clear-high-score-button {
-                margin-top: 10px;
                 background-color: #f44336; /* Red color for clear button */
+            }
+        }
+
+        /* Landscape Orientation Adjustments */
+        @media (orientation: landscape) and (max-width: 800px) {
+            .container {
+                flex-direction: row;
+            }
+
+            .endings, .declension-table {
+                flex: 1;
+                min-width: 300px;
+            }
+
+            .ending {
+                font-size: 18px; /* Consistent font size */
+                padding: 12px;    /* Consistent padding */
+                min-height: 50px; /* Consistent height */
+            }
+
+            table {
+                font-size: 14px; /* Consistent table text size */
+            }
+
+            th, td {
+                padding: 8px; /* Consistent padding */
+                min-width: 60px; /* Consistent width */
+                height: 50px; /* Consistent height */
+                word-wrap: break-word; /* Allow text to wrap */
             }
         }
 
@@ -287,7 +327,7 @@
 
         #endings-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
             gap: 5px;
         }
 
@@ -412,52 +452,6 @@
             transform: scale(1.2); /* Make the clone larger */
             transition: transform 0.2s;
             border-radius: 5px;
-        }
-
-        /* Additional Mobile-Specific Styles */
-        .mobile .ending {
-            font-size: 18px; /* Larger font */
-            padding: 12px;    /* More padding */
-            min-height: 50px; /* Increased height */
-        }
-
-        .mobile button {
-            width: 80%;
-            font-size: 18px;
-            padding: 12px 0;
-        }
-
-        .mobile #timer,
-        .mobile #high-score,
-        .mobile #feedback-message {
-            font-size: 18px;
-        }
-
-        .mobile table {
-            font-size: 14px; /* Larger table text */
-        }
-
-        .mobile th, .mobile td {
-            padding: 8px; /* Increased padding */
-            min-width: 50px; /* Increased width */
-            height: 40px; /* Increased height */
-        }
-
-        /* Reposition buttons for mobile */
-        .mobile .buttons {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .mobile #check-button,
-        .mobile #clear-high-score-button {
-            margin-top: 10px;
-            width: 80%;
-        }
-
-        .mobile #clear-high-score-button {
-            background-color: #f44336; /* Red color for clear button */
         }
     </style>
 </head>
@@ -825,13 +819,19 @@
                 target.classList.add('hide');
                 draggingClone = target.cloneNode(true);
                 draggingClone.classList.add('dragging-clone');
-                // Position the clone so that its center is under the finger
-                const cloneWidth = rect.width * 1.2; // 1.2 scale as per CSS
+
+                // Calculate the size based on CSS scaling (1.2x)
+                const cloneWidth = rect.width * 1.2;
                 const cloneHeight = rect.height * 1.2;
                 draggingClone.style.width = `${cloneWidth}px`;
                 draggingClone.style.height = `${cloneHeight}px`;
+
+                // Position the clone so that it's centered under the finger
                 draggingClone.style.left = `${touch.clientX - (cloneWidth / 2)}px`;
                 draggingClone.style.top = `${touch.clientY - (cloneHeight / 2)}px`;
+                draggingClone.style.transform = `translate(0px, 0px)`; // Reset any previous transforms
+                draggingClone.style.pointerEvents = 'none'; // Ensure it doesn't intercept touch events
+
                 document.body.appendChild(draggingClone);
             }
 
