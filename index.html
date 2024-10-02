@@ -178,8 +178,8 @@
             }
 
             .ending {
-                font-size: 16px;
-                padding: 8px;
+                font-size: 18px; /* Increased font size */
+                padding: 12px;    /* Increased padding */
             }
 
             button {
@@ -198,6 +198,17 @@
 
             #feedback-message {
                 font-size: 18px;
+            }
+
+            /* Adjust table font size for mobile */
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+                min-width: 50px;
+                height: 40px;
             }
         }
 
@@ -375,12 +386,43 @@
 
         /* Cloning Style for Mobile Dragging */
         .dragging-clone {
-            opacity: 0.7;
+            opacity: 0.9;
             pointer-events: none;
             position: absolute;
             z-index: 1000;
             border: 2px dashed #555;
             background-color: #fff;
+            transform: scale(1.2); /* Make the clone larger */
+            transition: transform 0.2s;
+            border-radius: 5px;
+        }
+
+        /* Additional Mobile-Specific Styles */
+        .mobile .ending {
+            font-size: 18px; /* Larger font */
+            padding: 12px;    /* More padding */
+        }
+
+        .mobile button {
+            width: 80%;
+            font-size: 18px;
+            padding: 12px 0;
+        }
+
+        .mobile #timer,
+        .mobile #high-score,
+        .mobile #feedback-message {
+            font-size: 18px;
+        }
+
+        .mobile table {
+            font-size: 14px; /* Larger table text */
+        }
+
+        .mobile th, .mobile td {
+            padding: 8px;
+            min-width: 50px;
+            height: 40px;
         }
     </style>
 </head>
@@ -525,6 +567,14 @@
                 selectedDeclensions = Array.from(checkboxes).map(cb => parseInt(cb.value));
                 const mobileCheckbox = document.getElementById('mobile-version-checkbox');
                 isMobileVersion = mobileCheckbox.checked;
+
+                // Add or remove 'mobile' class to body based on selection
+                if (isMobileVersion) {
+                    document.body.classList.add('mobile');
+                } else {
+                    document.body.classList.remove('mobile');
+                }
+
                 modal.style.display = 'none';
                 initializeGame();
                 startGame();
@@ -944,7 +994,7 @@
                 const highScoreData = localStorage.getItem('bestTime_' + declensionKey);
                 if (highScoreData) {
                     const highScoreObj = JSON.parse(highScoreData);
-                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(highScoreObj.time)} (Declensions: ${highScoreObj.declensions.map(d => declensionLabels[d]).join(', ')}, Version: ${isMobileVersion ? 'Mobile' : 'Desktop'})`;
+                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(highScoreObj.time)} (Declensions: ${highScoreObj.declensions.map(d => declensionLabels[d]).join(', ')}, Version: ${highScoreObj.version})`;
                 } else {
                     document.getElementById('high-score').textContent = `Best Time: --`;
                 }
