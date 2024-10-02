@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Latin Noun Declension Chart</title>
+    <!-- Thematic Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: 'Cinzel', serif;
+            margin: 20px;
+            cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAv0lEQVQ4T63UsQ2DMBBF0UOAiARhYAJ8gAbABqAANwAWcADcABXAAkwABkgABtMPlDdxXddKQieDvfz3m6dSYnHHeX1jEYAzf8YLxkZ/YvSGQCVtI2AhtxxYq0WYUyQH+S1oY0BPfUkgVGGW0nDPEcxAV1QydYiDeZY6K9ZTzIDiW6Y76Xb6nsmD+WN6rh2bxdUsAjYYv0oYp6jKJZ0haxxiuMD+gCSgx3DJ2wSHh32D0/jFne8WqjUl5/qQXYbbT7Br3oAAAAASUVORK5CYII='), auto; /* Themed Cursor (data URI for a quill icon) */
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .buttons {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 6px 12px;
+            margin: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Progress Bar */
+        #progress-container {
+            width: 100%;
+            background-color: #ddd;
+            height: 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #4caf50;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        /* Timer with Animation */
+        #timer-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        /* Animated Hourglass */
+        #hourglass {
+            position: relative;
+            width: 24px;
+            height: 40px;
+            margin-right: 5px;
+        }
+
+        #hourglass:before,
+        #hourglass:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+        }
+
+        #hourglass:before {
+            top: 0;
+            border-bottom: 12px solid #000;
+        }
+
+        #hourglass:after {
+            bottom: 0;
+            border-top: 12px solid #000;
+        }
+
+        #sand {
+            position: absolute;
+            top: 12px;
+            left: 0;
+            right: 0;
+            bottom: 12px;
+            background: linear-gradient(to bottom, #FFD700 50%, transparent 50%);
+            background-size: 100% 200%;
+            animation: sandFlow 2s infinite;
+        }
+
+        @keyframes sandFlow {
+            0% {
+                background-position: 0% 0%;
+            }
+            50% {
+                background-position: 0% 100%;
+            }
+            100% {
+                background-position: 0% 0%;
+            }
+        }
+
+        #timer {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        #high-score {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        #feedback-message {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        /* Case Label Colors */
+        .case-nominative th {
+            background-color: red;
+            color: white;
+        }
+
+        .case-genitive th {
+            background-color: green;
+            color: white;
+        }
+
+        .case-dative th {
+            background-color: orange;
+            color: black;
+        }
+
+        .case-accusative th {
+            background-color: blue;
+            color: white;
+        }
+
+        .case-ablative th {
+            background-color: pink;
+            color: black;
+        }
+
+        /* Top cell shading */
+        thead th {
+            background-color: lightgray;
+        }
+
+        /* Responsive Design Enhancements */
+        @media (max-width: 600px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .endings {
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .ending {
+                font-size: 16px;
+                padding: 8px;
+            }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: block;
+            position: fixed;
+            z-index: 999;
+            padding-top: 100px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        .modal h2 {
+            text-align: center;
+        }
+
+        .modal label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .endings {
+            flex: 1;
+            min-width: 200px;
+            margin-right: 20px;
+        }
+
+        .endings h2 {
+            text-align: center;
+        }
+
+        #endings-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 5px;
+        }
+
+        .ending {
+            background-color: #f0f0f0;
+            padding: 4px;
+            text-align: center;
+            cursor: move;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            font-weight: bold; /* Make endings bold */
+            text-transform: lowercase; /* Ensure lowercase */
+            transition: transform 0.2s, background-color 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ending.hide {
+            display: none;
+        }
+
+        /* Hover Effects on Endings */
+        .ending:hover {
+            transform: scale(1.1);
+            background-color: #e0e0e0;
+        }
+
+        .declension-table {
+            flex: 3;
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #aaa;
+            text-align: center;
+            padding: 4px;
+            min-width: 40px;
+            height: 30px;
+            font-size: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.2s;
+        }
+
+        .dropzone {
+            min-height: 30px;
+            position: relative;
+        }
+
+        /* Highlight Dropzone on Drag Over */
+        .dropzone.drag-over {
+            background-color: #f0f0f0;
+        }
+
+        /* Correct Answer Animation */
+        .ending.correct {
+            animation: glow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px #00ff00;
+            }
+            to {
+                box-shadow: 0 0 15px #00ff00;
+            }
+        }
+
+        /* Explosion Effect for Incorrect Answers */
+        .explosion-piece {
+            position: absolute;
+            background-color: red;
+            opacity: 1;
+            animation: explode 1s forwards;
+            /* Random shapes and sizes are set inline */
+        }
+
+        @keyframes explode {
+            to {
+                transform: translate(var(--dx), var(--dy)) rotate(var(--rotation)) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* Flash Effect */
+        .flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255,255,255,0.8);
+            pointer-events: none;
+            animation: flash 0.15s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes flash {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Latin Noun Declension Chart</h1>
+
+    <!-- Modal for Declension Selection -->
+    <div id="declension-modal" class="modal">
+        <div class="modal-content">
+            <h2>Select Declensions</h2>
+            <form id="declension-form">
+                <label><input type="checkbox" name="declensions" value="0" checked> 1st Declension</label>
+                <label><input type="checkbox" name="declensions" value="1" checked> 2nd Declension</label>
+                <label><input type="checkbox" name="declensions" value="2" checked> 2nd Declension Neuter</label>
+                <label><input type="checkbox" name="declensions" value="3" checked> 3rd Declension</label>
+                <label><input type="checkbox" name="declensions" value="4" checked> 3rd Declension Neuter</label>
+                <label><input type="checkbox" name="declensions" value="5" checked> 4th Declension</label>
+                <label><input type="checkbox" name="declensions" value="6" checked> 4th Declension Neuter</label>
+                <label><input type="checkbox" name="declensions" value="7" checked> 5th Declension</label>
+                <div class="buttons">
+                    <button type="button" id="modal-start-button">Start</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <button id="start-button">Restart</button>
+        <button id="check-button">Check Answers</button>
+    </div>
+
+    <!-- Progress Bar -->
+    <div id="progress-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <!-- Feedback Message -->
+    <div id="feedback-message">Let's get started!</div>
+
+    <!-- Timer and High Score -->
+    <div id="timer-container">
+        <div id="hourglass">
+            <div id="sand"></div>
+        </div>
+        <span id="timer">Time Elapsed: 0m 0s</span>
+    </div>
+    <div id="high-score">Best Time: --</div>
+
+    <div class="container">
+        <!-- Draggable Endings -->
+        <div class="endings">
+            <h2>Endings to Drag</h2>
+            <div id="endings-container">
+                <!-- Endings will be populated here -->
+            </div>
+        </div>
+
+        <!-- Declension Table -->
+        <div class="declension-table">
+            <table>
+                <thead>
+                    <tr id="table-header">
+                        <th></th>
+                        <!-- Declension headers will be inserted here -->
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Table rows will be generated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sound Effects -->
+    <audio id="correct-sound" src="correct-sound.mp3"></audio>
+    <audio id="incorrect-sound" src="incorrect-sound.mp3"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // JavaScript Code
+
+            // Declension Labels
+            const declensionLabels = ["1", "2", "2n", "3", "3n", "4", "4n", "5"];
+
+            // Case Labels and their corresponding CSS classes
+            const caseLabels = [
+                { label: "Nominative", class: "case-nominative" },
+                { label: "Genitive", class: "case-genitive" },
+                { label: "Dative", class: "case-dative" },
+                { label: "Accusative", class: "case-accusative" },
+                { label: "Ablative", class: "case-ablative" },
+                { label: "Nominative-P", class: "case-nominative" },
+                { label: "Genitive-P", class: "case-genitive" },
+                { label: "Dative-P", class: "case-dative" },
+                { label: "Accusative-P", class: "case-accusative" },
+                { label: "Ablative-P", class: "case-ablative" }
+            ];
+
+            // Correct Answers (2D Array)
+            const fullCorrectAnswers = [
+                ["a", "us/r", "um", "*", "*", "us", "u", "es"],
+                ["ae", "i", "i", "is", "is", "us", "us", "ei"],
+                ["ae", "o", "o", "i", "i", "ui", "u", "ei"],
+                ["am", "um", "um", "em", "*", "um", "u", "em"],
+                ["a", "o", "o", "e", "e", "u", "u", "e"],
+                ["ae", "i", "a", "es", "a", "us", "ua", "es"],
+                ["arum", "orum", "orum", "um", "um", "uum", "uum", "erum"],
+                ["is", "is", "is", "ibus", "ibus", "ibus", "ibus", "ebus"],
+                ["as", "os", "a", "es", "a", "us", "ua", "es"],
+                ["is", "is", "is", "ibus", "ibus", "ibus", "ibus", "ebus"]
+            ];
+
+            let selectedDeclensions = [];
+            let correctAnswers = [];
+            let endings = [];
+            let shuffledEndings = [];
+            let timerInterval = null;
+            let elapsedTime = 0;
+
+            const endingsContainer = document.getElementById('endings-container');
+            const timerDisplay = document.getElementById('timer');
+            const tableHeader = document.getElementById('table-header');
+            const tableBody = document.getElementById('table-body');
+
+            // Show Modal
+            const modal = document.getElementById('declension-modal');
+            const modalStartButton = document.getElementById('modal-start-button');
+
+            modalStartButton.addEventListener('click', () => {
+                const checkboxes = document.querySelectorAll('input[name="declensions"]:checked');
+                if (checkboxes.length === 0) {
+                    alert("Please select at least one declension.");
+                    return;
+                }
+                selectedDeclensions = Array.from(checkboxes).map(cb => parseInt(cb.value));
+                modal.style.display = 'none';
+                initializeGame();
+                startGame();
+            });
+
+            function initializeGame() {
+                // Build correctAnswers and endings based on selected declensions
+                correctAnswers = fullCorrectAnswers.map(row => selectedDeclensions.map(col => row[col]));
+                endings = correctAnswers.flat();
+
+                // Build table header
+                tableHeader.innerHTML = '<th></th>';
+                selectedDeclensions.forEach(col => {
+                    const th = document.createElement('th');
+                    th.textContent = declensionLabels[col];
+                    tableHeader.appendChild(th);
+                });
+
+                // Build table body
+                tableBody.innerHTML = '';
+                correctAnswers.forEach((row, rowIndex) => {
+                    const tr = document.createElement('tr');
+                    tr.classList.add(caseLabels[rowIndex].class);
+
+                    const th = document.createElement('th');
+                    th.textContent = caseLabels[rowIndex].label;
+                    tr.appendChild(th);
+
+                    row.forEach((cell, colIndex) => {
+                        const td = document.createElement('td');
+                        td.classList.add('dropzone');
+                        td.setAttribute('data-row', rowIndex);
+                        td.setAttribute('data-col', colIndex);
+
+                        td.addEventListener('dragover', dragOver);
+                        td.addEventListener('dragenter', dragEnter);
+                        td.addEventListener('dragleave', dragLeave);
+                        td.addEventListener('drop', drop);
+
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            }
+
+            function createEndings() {
+                endingsContainer.innerHTML = '';
+                shuffledEndings.forEach((ending, index) => {
+                    const endingDiv = document.createElement('div');
+                    endingDiv.classList.add('ending');
+                    endingDiv.textContent = ending.toLowerCase(); // Ensure lowercase
+                    endingDiv.setAttribute('draggable', 'true');
+                    endingDiv.setAttribute('id', 'ending-' + index);
+
+                    endingDiv.addEventListener('dragstart', dragStart);
+                    endingDiv.addEventListener('dragend', dragEnd);
+
+                    endingsContainer.appendChild(endingDiv);
+                });
+            }
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            function startGame() {
+                // Clear table
+                const dropzones = document.querySelectorAll('.dropzone');
+                dropzones.forEach(zone => {
+                    if (zone.firstChild) {
+                        endingsContainer.appendChild(zone.firstChild);
+                    }
+                });
+
+                const endingsElements = document.querySelectorAll('.ending');
+                endingsElements.forEach(ending => {
+                    ending.classList.remove('correct');
+                });
+
+                // Shuffle endings
+                shuffledEndings = shuffleArray([...endings]);
+
+                // Recreate endings
+                createEndings();
+
+                // Reset timer
+                stopTimer();
+                elapsedTime = 0;
+                updateTimerDisplay();
+
+                // Reset feedback message and progress bar
+                document.getElementById('feedback-message').textContent = "Let's get started!";
+                document.getElementById('progress-bar').style.width = '0%';
+
+                // Get high score
+                getHighScore();
+
+                // Start timer
+                startTimer();
+            }
+
+            function startTimer() {
+                timerInterval = setInterval(() => {
+                    elapsedTime++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+
+            function stopTimer() {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+
+            function formatTime(seconds) {
+                let minutes = Math.floor(seconds / 60);
+                let secs = seconds % 60;
+                return `${minutes}m ${secs}s`;
+            }
+
+            function updateTimerDisplay() {
+                timerDisplay.textContent = `Time Elapsed: ${formatTime(elapsedTime)}`;
+            }
+
+            function dragStart(e) {
+                e.dataTransfer.setData('text/plain', e.target.id);
+                setTimeout(() => {
+                    e.target.classList.add('hide');
+                }, 0);
+            }
+
+            function dragEnd(e) {
+                e.target.classList.remove('hide');
+            }
+
+            function dragOver(e) {
+                e.preventDefault();
+            }
+
+            function dragEnter(e) {
+                e.preventDefault();
+                if (e.target.classList.contains('dropzone')) {
+                    e.target.classList.add('drag-over');
+                }
+            }
+
+            function dragLeave(e) {
+                if (e.target.classList.contains('dropzone')) {
+                    e.target.classList.remove('drag-over');
+                }
+            }
+
+            function drop(e) {
+                e.target.classList.remove('drag-over');
+
+                // Get the draggable element
+                const id = e.dataTransfer.getData('text/plain');
+                const draggable = document.getElementById(id);
+
+                // Add it to the dropzone
+                if (e.target.classList.contains('dropzone')) {
+                    // Remove any existing child
+                    if (e.target.firstChild && e.target.firstChild !== draggable) {
+                        endingsContainer.appendChild(e.target.firstChild);
+                    }
+                    e.target.appendChild(draggable);
+                    draggable.classList.remove('hide');
+                }
+            }
+
+            function playSound(soundId) {
+                const sound = document.getElementById(soundId);
+                sound.currentTime = 0;
+                sound.play();
+            }
+
+            function checkAnswers() {
+                let allCorrect = true;
+                const dropzones = document.querySelectorAll('.dropzone');
+
+                dropzones.forEach(zone => {
+                    const row = zone.getAttribute('data-row');
+                    const col = zone.getAttribute('data-col');
+                    const correctEnding = correctAnswers[row][col];
+
+                    if (zone.firstChild) {
+                        const endingElement = zone.firstChild;
+                        const userEnding = endingElement.textContent.trim().toLowerCase();
+                        if (userEnding === correctEnding.toLowerCase()) {
+                            endingElement.classList.add('correct');
+                            playSound('correct-sound');
+                        } else {
+                            playSound('incorrect-sound');
+                            createExplosion(zone);
+                            endingsContainer.appendChild(endingElement);
+                            endingElement.classList.remove('correct');
+                            endingElement.classList.remove('hide');
+                            allCorrect = false;
+                        }
+                    } else {
+                        allCorrect = false;
+                    }
+                });
+
+                updateProgressBar();
+
+                if (allCorrect) {
+                    stopTimer();
+                    // Confetti effect
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                    updateHighScore();
+                } else {
+                    if (!timerInterval) {
+                        startTimer();
+                    }
+                }
+            }
+
+            function updateProgressBar() {
+                const totalCells = document.querySelectorAll('.dropzone').length;
+                const correctCells = document.querySelectorAll('.ending.correct').length;
+                const progressPercent = (correctCells / totalCells) * 100;
+                document.getElementById('progress-bar').style.width = progressPercent + '%';
+
+                // Update feedback message
+                const feedbackMessage = document.getElementById('feedback-message');
+                if (progressPercent === 100) {
+                    feedbackMessage.textContent = "All correct! Well done!";
+                } else if (progressPercent >= 75) {
+                    feedbackMessage.textContent = "Almost there!";
+                } else if (progressPercent >= 50) {
+                    feedbackMessage.textContent = "You're halfway there!";
+                } else if (progressPercent > 0) {
+                    feedbackMessage.textContent = "Keep going!";
+                } else {
+                    feedbackMessage.textContent = "Let's get started!";
+                }
+            }
+
+            function createExplosion(zone) {
+                const rect = zone.getBoundingClientRect();
+                const pieceCount = 50; // Increased number of pieces
+                const container = document.createElement('div');
+                container.style.position = 'absolute';
+                container.style.left = '0';
+                container.style.top = '0';
+                container.style.width = '100%';
+                container.style.height = '100%';
+                container.style.pointerEvents = 'none';
+
+                for (let i = 0; i < pieceCount; i++) {
+                    const piece = document.createElement('div');
+                    piece.classList.add('explosion-piece');
+
+                    // Random size
+                    const size = Math.random() * 6 + 4; // Between 4px and 10px
+                    piece.style.width = size + 'px';
+                    piece.style.height = size + 'px';
+
+                    // Random shape
+                    if (Math.random() > 0.5) {
+                        piece.style.borderRadius = '50%'; // Circle
+                    } else {
+                        piece.style.borderRadius = '0%'; // Square
+                    }
+
+                    // Random color (shades of red, orange, yellow)
+                    const colors = ['#ff0000', '#ff4500', '#ff8c00', '#ffd700'];
+                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+
+                    // Position at center
+                    piece.style.left = rect.width / 2 + 'px';
+                    piece.style.top = rect.height / 2 + 'px';
+
+                    // Random angle and distance
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = Math.random() * 100 + 50; // Increased distance
+                    const dx = Math.cos(angle) * distance + 'px';
+                    const dy = Math.sin(angle) * distance + 'px';
+                    piece.style.setProperty('--dx', dx);
+                    piece.style.setProperty('--dy', dy);
+
+                    // Random rotation
+                    const rotation = Math.random() * 720 - 360 + 'deg';
+                    piece.style.setProperty('--rotation', rotation);
+
+                    container.appendChild(piece);
+                }
+
+                zone.appendChild(container);
+
+                // Flash effect
+                const flash = document.createElement('div');
+                flash.classList.add('flash');
+                document.body.appendChild(flash);
+
+                // Remove the explosion pieces and flash after animation
+                setTimeout(() => {
+                    if (zone.contains(container)) {
+                        zone.removeChild(container);
+                    }
+                    document.body.removeChild(flash);
+                }, 1000); // Duration should match the explode animation duration
+            }
+
+            function getHighScore() {
+                const highScore = localStorage.getItem('bestTime');
+                if (highScore) {
+                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(highScore)}`;
+                } else {
+                    document.getElementById('high-score').textContent = `Best Time: --`;
+                }
+            }
+
+            function updateHighScore() {
+                const highScore = localStorage.getItem('bestTime');
+                if (!highScore || elapsedTime < parseInt(highScore)) {
+                    localStorage.setItem('bestTime', elapsedTime);
+                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(elapsedTime)}`;
+                    alert('New Best Time!');
+                }
+            }
+
+            // Event listeners for buttons
+            document.getElementById('start-button').addEventListener('click', () => {
+                modal.style.display = 'block';
+            });
+            document.getElementById('check-button').addEventListener('click', checkAnswers);
+
+            // Show the modal on page load and get high score
+            modal.style.display = 'block';
+            getHighScore();
+        });
+    </script>
+</body>
+</html>
