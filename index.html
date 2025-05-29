@@ -1,1080 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Latin Noun Declension Chart</title>
-    <!-- Thematic Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap" rel="stylesheet">
-    <!-- Confetti Library -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-    <style>
-        /* CSS Styles */
-        body {
-            font-family: 'Cinzel', serif;
-            margin: 20px;
-            cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAv0lEQVQ4T63UsQ2DMBBF0UOAiARhYAJ8gAbABqAANwAWcADcABXAAkwABkgABtMPlDdxXddKQieDvfz3m6dSYnHHeX1jEYAzf8YLxkZ/YvSGQCVtI2AhtxxYq0WYUyQH+S1oY0BPfUkgVGGW0nDPEcxAV1QydYiDeZY6K9ZTzIDiW6Y76Xb6nsmD+WN6rh2bxdUsAjYYv0oYp6jKJZ0haxxiuMD+gCSgx3DJ2wSHh32D0/jFne8WqjUl5/qQXYbbT7Br3oAAAAASUVORK5CYII='), auto; /* Themed Cursor (data URI for a quill icon) */
-        }
-
-        h1 {
-            text-align: center;
-        }
-
-        .buttons {
-            text-align: center;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            background-color: #4caf50;
-            color: white;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #45a049;
-        }
-
-        /* Progress Bar */
-        #progress-container {
-            width: 100%;
-            background-color: #ddd;
-            height: 20px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-        }
-
-        #progress-bar {
-            width: 0%;
-            height: 100%;
-            background-color: #4caf50;
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-
-        /* Timer with Animation */
-        #timer-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        /* Animated Hourglass */
-        #hourglass {
-            position: relative;
-            width: 24px;
-            height: 40px;
-            margin-right: 5px;
-        }
-
-        #hourglass:before,
-        #hourglass:after {
-            content: '';
-            position: absolute;
-            left: 0;
-            right: 0;
-            border-left: 12px solid transparent;
-            border-right: 12px solid transparent;
-        }
-
-        #hourglass:before {
-            top: 0;
-            border-bottom: 12px solid #000;
-        }
-
-        #hourglass:after {
-            bottom: 0;
-            border-top: 12px solid #000;
-        }
-
-        #sand {
-            position: absolute;
-            top: 12px;
-            left: 0;
-            right: 0;
-            bottom: 12px;
-            background: linear-gradient(to bottom, #FFD700 50%, transparent 50%);
-            background-size: 100% 200%;
-            animation: sandFlow 2s infinite;
-        }
-
-        @keyframes sandFlow {
-            0% {
-                background-position: 0% 0%;
-            }
-            50% {
-                background-position: 0% 100%;
-            }
-            100% {
-                background-position: 0% 0%;
-            }
-        }
-
-        #timer {
-            font-size: 16px;
-            text-align: center;
-        }
-
-        #high-score {
-            text-align: center;
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        #feedback-message {
-            text-align: center;
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        /* Case Label Colors */
-        .case-nominative th {
-            background-color: red;
-            color: white;
-        }
-
-        .case-genitive th {
-            background-color: green;
-            color: white;
-        }
-
-        .case-dative th {
-            background-color: orange;
-            color: black;
-        }
-
-        .case-accusative th {
-            background-color: blue;
-            color: white;
-        }
-
-        .case-ablative th {
-            background-color: pink;
-            color: black;
-        }
-
-        /* Top cell shading */
-        thead th {
-            background-color: lightgray;
-        }
-
-        /* Responsive Design Enhancements */
-        @media (max-width: 600px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .endings {
-                margin-right: 0;
-                margin-bottom: 20px;
-            }
-
-            .ending {
-                font-size: 18px; /* Increased font size */
-                padding: 12px;    /* Increased padding */
-                min-height: 50px; /* Increased height */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-            button {
-                width: 80%;
-                font-size: 18px;
-                padding: 12px 0;
-            }
-
-            #timer {
-                font-size: 18px;
-            }
-
-            #high-score {
-                font-size: 18px;
-            }
-
-            #feedback-message {
-                font-size: 18px;
-            }
-
-            /* Adjust table font size and cell size for mobile */
-            table {
-                font-size: 14px; /* Increased table text size */
-            }
-
-            th, td {
-                padding: 8px; /* Increased padding */
-                min-width: 60px; /* Increased width */
-                height: 50px; /* Increased height */
-                word-wrap: break-word; /* Allow text to wrap */
-            }
-
-            /* Reposition buttons for mobile */
-            .buttons {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-
-            #check-button,
-            #clear-high-score-button {
-                margin-top: 10px;
-                width: 80%;
-            }
-
-            #clear-high-score-button {
-                background-color: #f44336; /* Red color for clear button */
-            }
-        }
-
-        /* Landscape Orientation Adjustments */
-        @media (orientation: landscape) and (max-width: 800px) {
-            .container {
-                flex-direction: row;
-            }
-
-            .endings, .declension-table {
-                flex: 1;
-                min-width: 300px;
-            }
-
-            .ending {
-                font-size: 18px; /* Consistent font size */
-                padding: 12px;    /* Consistent padding */
-                min-height: 50px; /* Consistent height */
-            }
-
-            table {
-                font-size: 14px; /* Consistent table text size */
-            }
-
-            th, td {
-                padding: 8px; /* Consistent padding */
-                min-width: 60px; /* Consistent width */
-                height: 50px; /* Consistent height */
-                word-wrap: break-word; /* Allow text to wrap */
-            }
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: block;
-            position: fixed;
-            z-index: 999;
-            padding-top: 50px;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 10px;
-        }
-
-        .modal h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .modal label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .version-selection {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .endings {
-            flex: 1;
-            min-width: 200px;
-            margin-right: 20px;
-        }
-
-        .endings h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        #endings-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-            gap: 5px;
-        }
-
-        .ending {
-            background-color: #f0f0f0;
-            padding: 4px;
-            text-align: center;
-            cursor: grab;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            font-weight: bold; /* Make endings bold */
-            text-transform: lowercase; /* Ensure lowercase */
-            transition: transform 0.2s, background-color 0.2s;
-            position: relative;
-            overflow: hidden;
-            border-radius: 5px;
-        }
-
-        .ending.hide {
-            display: none;
-        }
-
-        /* Hover Effects on Endings */
-        .ending:hover {
-            transform: scale(1.1);
-            background-color: #e0e0e0;
-        }
-
-        .declension-table {
-            flex: 3;
-            overflow-x: auto;
-        }
-
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            table-layout: fixed;
-        }
-
-        th, td {
-            border: 1px solid #aaa;
-            text-align: center;
-            padding: 4px;
-            min-width: 40px;
-            height: 30px;
-            font-size: 12px;
-            position: relative;
-            overflow: hidden;
-            transition: background-color 0.2s;
-        }
-
-        .dropzone {
-            min-height: 30px;
-            position: relative;
-        }
-
-        /* Highlight Dropzone on Drag Over */
-        .dropzone.drag-over {
-            background-color: #f0f0f0;
-        }
-
-        /* Correct Answer Animation */
-        .ending.correct {
-            animation: glow 1s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 5px #00ff00;
-            }
-            to {
-                box-shadow: 0 0 15px #00ff00;
-            }
-        }
-
-        /* Explosion Effect for Incorrect Answers */
-        .explosion-piece {
-            position: absolute;
-            background-color: red;
-            opacity: 1;
-            animation: explode 1s forwards;
-            /* Random shapes and sizes are set inline */
-        }
-
-        @keyframes explode {
-            to {
-                transform: translate(var(--dx), var(--dy)) rotate(var(--rotation)) scale(0.5);
-                opacity: 0;
-            }
-        }
-
-        /* Flash Effect */
-        .flash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255,255,255,0.8);
-            pointer-events: none;
-            animation: flash 0.15s ease-out;
-            z-index: 1000;
-        }
-
-        @keyframes flash {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0;
-            }
-        }
-
-        /* Cloning Style for Mobile Dragging */
-        .dragging-clone {
-            opacity: 0.9;
-            pointer-events: none;
-            position: absolute;
-            z-index: 1000;
-            border: 2px dashed #555;
-            background-color: #fff;
-            transform: scale(1.2); /* Make the clone larger */
-            transition: transform 0.2s;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Latin Declension Drag & Drop Practice</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    :root { --royal-blue: #4169e1; --light-blue: #f5faff; --white: #ffffff; --gray-light: #f0f0f0; --red: #e74c3c; --green: #27ae60; --orange: #e67e22; --blue: #3498db; --pink: #fd79a8; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Cinzel', serif; background: var(--light-blue); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+    h1 { color: var(--royal-blue); text-align: center; margin-bottom: 10px; }
+    .panel { background: var(--white); padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width: 90%; max-width: 400px; margin-bottom: 20px; }
+    .panel h2 { margin-top: 0; text-align: center; }
+    .panel label { display: block; margin: 8px 0; font-size: 1rem; }
+    button { font-family: inherit; font-weight: 600; background: var(--royal-blue); color: var(--white); border: none; border-radius: 4px; padding: 10px 20px; cursor: pointer; transition: background .2s; margin: 5px; }
+    button:hover { background: #27408B; }
+    #timer { font-size: 1.2rem; margin-bottom: 10px; }
+    #check-button, #restart-button { margin-bottom: 10px; }
+    #current-ending { background: var(--white); border: 2px solid var(--royal-blue); border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); cursor: grab; user-select: none; transition: transform .2s; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; visibility: hidden; }
+    .declension-table { width: 90%; max-width: 800px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { border: 1px solid #aaa; text-align: center; padding: 8px; min-width: 60px; height: 50px; overflow: hidden; }
+    .case-nominative th { background: var(--red); color: #fff; }
+    .case-genitive th   { background: var(--green); color: #fff; }
+    .case-dative th     { background: var(--orange); color: #000; }
+    .case-accusative th { background: var(--blue); color: #fff; }
+    .case-ablative th   { background: var(--pink); color: #000; }
+    .dropzone.drag-over { background: var(--gray-light); }
+  </style>
 </head>
 <body>
-    <h1>Latin Noun Declension Chart</h1>
-
-    <!-- Modal for Declension Selection and Version Choice -->
-    <div id="declension-modal" class="modal">
-        <div class="modal-content">
-            <h2>Select Declensions</h2>
-            <form id="declension-form">
-                <label><input type="checkbox" name="declensions" value="0" checked> 1st Declension</label>
-                <label><input type="checkbox" name="declensions" value="1" checked> 2nd Declension</label>
-                <label><input type="checkbox" name="declensions" value="2" checked> 2nd Declension Neuter</label>
-                <label><input type="checkbox" name="declensions" value="3" checked> 3rd Declension</label>
-                <label><input type="checkbox" name="declensions" value="4" checked> 3rd Declension Neuter</label>
-                <label><input type="checkbox" name="declensions" value="5" checked> 4th Declension</label>
-                <label><input type="checkbox" name="declensions" value="6" checked> 4th Declension Neuter</label>
-                <label><input type="checkbox" name="declensions" value="7" checked> 5th Declension</label>
-                
-                <!-- Version Selection Checkbox -->
-                <div class="version-selection">
-                    <label><input type="checkbox" id="mobile-version-checkbox"> Mobile Version</label>
-                </div>
-                
-                <div class="buttons">
-                    <button type="button" id="modal-start-button">Start</button>
-                </div>
-            </form>
-        </div>
+  <h1>Latin Declension Practice</h1>
+  <div id="selection-container" class="panel">
+    <h2>Select Declensions</h2>
+    <form id="selection-form">
+      <label><input type="checkbox" name="declension" value="0" checked> 1st Declension</label>
+      <label><input type="checkbox" name="declension" value="1" checked> 2nd Declension</label>
+      <label><input type="checkbox" name="declension" value="2"> 2nd Declension Neuter</label>
+      <label><input type="checkbox" name="declension" value="3" checked> 3rd Declension</label>
+      <label><input type="checkbox" name="declension" value="4"> 3rd Declension Neuter</label>
+      <label><input type="checkbox" name="declension" value="5"> 4th Declension</label>
+      <label><input type="checkbox" name="declension" value="6"> 4th Declension Neuter</label>
+      <label><input type="checkbox" name="declension" value="7"> 5th Declension</label>
+      <div style="text-align:center; margin-top:10px;"><button type="button" id="selection-start">Start Practice</button></div>
+    </form>
+  </div>
+  <div id="game-container" style="display:none; width:100%; max-width:800px; text-align:center;">
+    <div id="timer"></div>
+    <button id="check-button">Check Answers</button>
+    <button id="restart-button">Restart</button>
+    <div id="current-ending" draggable="true"></div>
+    <div class="declension-table">
+      <table>
+        <thead><tr id="table-header"><th>Case</th></tr></thead>
+        <tbody id="table-body"></tbody>
+      </table>
     </div>
-
-    <div class="buttons">
-        <button id="start-button">Restart</button>
-        <button id="check-button">Check Answers</button>
-        <button id="clear-high-score-button">Clear High Score</button> <!-- New Clear High Score Button -->
-    </div>
-
-    <!-- Progress Bar -->
-    <div id="progress-container">
-        <div id="progress-bar"></div>
-    </div>
-
-    <!-- Feedback Message -->
-    <div id="feedback-message">Let's get started!</div>
-
-    <!-- Timer and High Score -->
-    <div id="timer-container">
-        <div id="hourglass">
-            <div id="sand"></div>
-        </div>
-        <span id="timer">Time Elapsed: 0m 0s</span>
-    </div>
-    <div id="high-score">Best Time: --</div>
-
-    <div class="container">
-        <!-- Draggable Endings -->
-        <div class="endings">
-            <h2>Endings to Drag</h2>
-            <div id="endings-container">
-                <!-- Endings will be populated here -->
-            </div>
-        </div>
-
-        <!-- Declension Table -->
-        <div class="declension-table">
-            <table>
-                <thead>
-                    <tr id="table-header">
-                        <th></th>
-                        <!-- Declension headers will be inserted here -->
-                    </tr>
-                </thead>
-                <tbody id="table-body">
-                    <!-- Table rows will be generated here -->
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Sound Effects -->
-    <audio id="correct-sound" src="correct-sound.mp3"></audio>
-    <audio id="incorrect-sound" src="incorrect-sound.mp3"></audio>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // JavaScript Code
-
-            // Declension Labels
-            const declensionLabels = ["1", "2", "2n", "3", "3n", "4", "4n", "5"];
-
-            // Case Labels and their corresponding CSS classes
-            const caseLabels = [
-                { label: "Nominative", class: "case-nominative" },
-                { label: "Genitive", class: "case-genitive" },
-                { label: "Dative", class: "case-dative" },
-                { label: "Accusative", class: "case-accusative" },
-                { label: "Ablative", class: "case-ablative" },
-                { label: "Nominative-P", class: "case-nominative" },
-                { label: "Genitive-P", class: "case-genitive" },
-                { label: "Dative-P", class: "case-dative" },
-                { label: "Accusative-P", class: "case-accusative" },
-                { label: "Ablative-P", class: "case-ablative" }
-            ];
-
-            // Correct Answers (2D Array)
-            const fullCorrectAnswers = [
-                ["a", "us/r", "um", "*", "*", "us", "u", "es"],
-                ["ae", "i", "i", "is", "is", "us", "us", "ei"],
-                ["ae", "o", "o", "i", "i", "ui", "u", "ei"],
-                ["am", "um", "um", "em", "*", "um", "u", "em"],
-                ["a", "o", "o", "e", "e", "u", "u", "e"],
-                ["ae", "i", "a", "es", "a", "us", "ua", "es"],
-                ["arum", "orum", "orum", "um", "um", "uum", "uum", "erum"],
-                ["is", "is", "is", "ibus", "ibus", "ibus", "ibus", "ebus"],
-                ["as", "os", "a", "es", "a", "us", "ua", "es"],
-                ["is", "is", "is", "ibus", "ibus", "ibus", "ibus", "ebus"]
-            ];
-
-            let selectedDeclensions = [];
-            let correctAnswers = [];
-            let endings = [];
-            let shuffledEndings = [];
-            let timerInterval = null;
-            let elapsedTime = 0;
-            let isMobileVersion = false;
-
-            const endingsContainer = document.getElementById('endings-container');
-            const timerDisplay = document.getElementById('timer');
-            const tableHeader = document.getElementById('table-header');
-            const tableBody = document.getElementById('table-body');
-
-            // Show Modal
-            const modal = document.getElementById('declension-modal');
-            const modalStartButton = document.getElementById('modal-start-button');
-
-            modalStartButton.addEventListener('click', () => {
-                const checkboxes = document.querySelectorAll('input[name="declensions"]:checked');
-                if (checkboxes.length === 0) {
-                    alert("Please select at least one declension.");
-                    return;
-                }
-                selectedDeclensions = Array.from(checkboxes).map(cb => parseInt(cb.value));
-                const mobileCheckbox = document.getElementById('mobile-version-checkbox');
-                isMobileVersion = mobileCheckbox.checked;
-
-                // Add or remove 'mobile' class to body based on selection
-                if (isMobileVersion) {
-                    document.body.classList.add('mobile');
-                } else {
-                    document.body.classList.remove('mobile');
-                }
-
-                modal.style.display = 'none';
-                initializeGame();
-                startGame();
-            });
-
-            function initializeGame() {
-                // Build correctAnswers and endings based on selected declensions
-                correctAnswers = fullCorrectAnswers.map(row => selectedDeclensions.map(col => row[col]));
-                endings = correctAnswers.flat();
-
-                // Build table header
-                tableHeader.innerHTML = '<th></th>';
-                selectedDeclensions.forEach(col => {
-                    const th = document.createElement('th');
-                    th.textContent = declensionLabels[col];
-                    tableHeader.appendChild(th);
-                });
-
-                // Build table body
-                tableBody.innerHTML = '';
-                correctAnswers.forEach((row, rowIndex) => {
-                    const tr = document.createElement('tr');
-                    tr.classList.add(caseLabels[rowIndex].class);
-
-                    const th = document.createElement('th');
-                    th.textContent = caseLabels[rowIndex].label;
-                    tr.appendChild(th);
-
-                    row.forEach((cell, colIndex) => {
-                        const td = document.createElement('td');
-                        td.classList.add('dropzone');
-                        td.setAttribute('data-row', rowIndex);
-                        td.setAttribute('data-col', colIndex);
-
-                        // Add event listeners for drag-and-drop
-                        td.addEventListener('dragover', dragOver);
-                        td.addEventListener('dragenter', dragEnter);
-                        td.addEventListener('dragleave', dragLeave);
-                        td.addEventListener('drop', drop);
-
-                        // For mobile: add touch events with correct function references
-                        if (isMobileVersion) {
-                            td.addEventListener('touchstart', mobileDragStart, { passive: false });
-                            td.addEventListener('touchmove', mobileDragMove, { passive: false });
-                            td.addEventListener('touchend', mobileDragEnd, { passive: false });
-                        }
-
-                        tr.appendChild(td);
-                    });
-                    tableBody.appendChild(tr);
-                });
-            }
-
-            function createEndings() {
-                endingsContainer.innerHTML = '';
-                shuffledEndings.forEach((ending, index) => {
-                    const endingDiv = document.createElement('div');
-                    endingDiv.classList.add('ending');
-                    endingDiv.textContent = ending.toLowerCase(); // Ensure lowercase
-                    endingDiv.setAttribute('draggable', 'true');
-                    endingDiv.setAttribute('id', 'ending-' + index);
-
-                    // Add event listeners for drag-and-drop
-                    endingDiv.addEventListener('dragstart', dragStart);
-                    endingDiv.addEventListener('dragend', dragEnd);
-
-                    // For mobile: add touch events
-                    if (isMobileVersion) {
-                        endingDiv.addEventListener('touchstart', mobileDragStart, { passive: false });
-                        endingDiv.addEventListener('touchmove', mobileDragMove, { passive: false });
-                        endingDiv.addEventListener('touchend', mobileDragEnd, { passive: false });
-                    }
-
-                    endingsContainer.appendChild(endingDiv);
-                });
-            }
-
-            function shuffleArray(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
-            }
-
-            function startGame() {
-                // Clear table
-                const dropzones = document.querySelectorAll('.dropzone');
-                dropzones.forEach(zone => {
-                    if (zone.firstChild) {
-                        endingsContainer.appendChild(zone.firstChild);
-                    }
-                });
-
-                const endingsElements = document.querySelectorAll('.ending');
-                endingsElements.forEach(ending => {
-                    ending.classList.remove('correct');
-                });
-
-                // Shuffle endings
-                shuffledEndings = shuffleArray([...endings]);
-
-                // Recreate endings
-                createEndings();
-
-                // Reset timer
-                stopTimer();
-                elapsedTime = 0;
-                updateTimerDisplay();
-
-                // Reset feedback message and progress bar
-                document.getElementById('feedback-message').textContent = "Let's get started!";
-                document.getElementById('progress-bar').style.width = '0%';
-
-                // Get high score after initializing game
-                getHighScore();
-
-                // Start timer
-                startTimer();
-            }
-
-            function startTimer() {
-                timerInterval = setInterval(() => {
-                    elapsedTime++;
-                    updateTimerDisplay();
-                }, 1000);
-            }
-
-            function stopTimer() {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
-
-            function formatTime(seconds) {
-                let minutes = Math.floor(seconds / 60);
-                let secs = seconds % 60;
-                return `${minutes}m ${secs}s`;
-            }
-
-            function updateTimerDisplay() {
-                timerDisplay.textContent = `Time Elapsed: ${formatTime(elapsedTime)}`;
-            }
-
-            function dragStart(e) {
-                e.dataTransfer.setData('text/plain', e.target.id);
-                setTimeout(() => {
-                    e.target.classList.add('hide');
-                }, 0);
-            }
-
-            function dragEnd(e) {
-                e.target.classList.remove('hide');
-            }
-
-            function dragOver(e) {
-                e.preventDefault();
-            }
-
-            function dragEnter(e) {
-                e.preventDefault();
-                if (e.target.classList.contains('dropzone')) {
-                    e.target.classList.add('drag-over');
-                }
-            }
-
-            function dragLeave(e) {
-                if (e.target.classList.contains('dropzone')) {
-                    e.target.classList.remove('drag-over');
-                }
-            }
-
-            function drop(e) {
-                e.preventDefault();
-                e.target.classList.remove('drag-over');
-
-                // Get the draggable element
-                const id = e.dataTransfer.getData('text/plain');
-                const draggable = document.getElementById(id);
-
-                // Add it to the dropzone
-                if (e.target.classList.contains('dropzone')) {
-                    // Remove any existing child
-                    if (e.target.firstChild && e.target.firstChild !== draggable) {
-                        endingsContainer.appendChild(e.target.firstChild);
-                    }
-                    e.target.appendChild(draggable);
-                    draggable.classList.remove('hide');
-                }
-            }
-
-            // Mobile Drag-and-Drop Implementation
-            let touchDraggedElement = null;
-            let touchOffsetX = 0;
-            let touchOffsetY = 0;
-            let currentDropzone = null;
-            let draggingClone = null;
-
-            function mobileDragStart(e) {
-                e.preventDefault();
-                const touch = e.changedTouches[0];
-                const target = e.target;
-
-                // Ensure the touched element is an ending
-                if (!target.classList.contains('ending')) return;
-
-                touchDraggedElement = target;
-                const rect = target.getBoundingClientRect();
-                touchOffsetX = touch.clientX - rect.left;
-                touchOffsetY = touch.clientY - rect.top;
-
-                // Create a clone for dragging effect
-                target.classList.add('hide');
-                draggingClone = target.cloneNode(true);
-                draggingClone.classList.add('dragging-clone');
-
-                // Calculate the size based on CSS scaling (1.2x)
-                const cloneWidth = rect.width * 1.2;
-                const cloneHeight = rect.height * 1.2;
-                draggingClone.style.width = `${cloneWidth}px`;
-                draggingClone.style.height = `${cloneHeight}px`;
-
-                // Position the clone so that it's centered under the finger
-                draggingClone.style.left = `${touch.clientX - (cloneWidth / 2)}px`;
-                draggingClone.style.top = `${touch.clientY - (cloneHeight / 2)}px`;
-                draggingClone.style.transform = `translate(0px, 0px)`; // Reset any previous transforms
-                draggingClone.style.pointerEvents = 'none'; // Ensure it doesn't intercept touch events
-
-                document.body.appendChild(draggingClone);
-            }
-
-            function mobileDragMove(e) {
-                if (!touchDraggedElement) return;
-                e.preventDefault();
-                const touch = e.changedTouches[0];
-
-                if (draggingClone) {
-                    const cloneWidth = draggingClone.getBoundingClientRect().width;
-                    const cloneHeight = draggingClone.getBoundingClientRect().height;
-                    draggingClone.style.left = `${touch.clientX - (cloneWidth / 2)}px`;
-                    draggingClone.style.top = `${touch.clientY - (cloneHeight / 2)}px`;
-                }
-
-                // Highlight dropzones under touch
-                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-                const dropzone = elementBelow && elementBelow.classList.contains('dropzone') ? elementBelow : null;
-
-                if (currentDropzone && currentDropzone !== dropzone) {
-                    currentDropzone.classList.remove('drag-over');
-                }
-
-                if (dropzone && currentDropzone !== dropzone) {
-                    dropzone.classList.add('drag-over');
-                    currentDropzone = dropzone;
-                } else if (!dropzone && currentDropzone) {
-                    currentDropzone.classList.remove('drag-over');
-                    currentDropzone = null;
-                }
-            }
-
-            function mobileDragEnd(e) {
-                if (!touchDraggedElement) return;
-                e.preventDefault();
-                const touch = e.changedTouches[0];
-
-                // Remove the clone
-                if (draggingClone) {
-                    document.body.removeChild(draggingClone);
-                    draggingClone = null;
-                }
-
-                if (currentDropzone) {
-                    // Remove any existing child in the dropzone
-                    if (currentDropzone.firstChild && currentDropzone.firstChild !== touchDraggedElement) {
-                        endingsContainer.appendChild(currentDropzone.firstChild);
-                    }
-                    currentDropzone.appendChild(touchDraggedElement);
-                    touchDraggedElement.classList.remove('hide');
-                    currentDropzone.classList.remove('drag-over');
-                } else {
-                    // Return to original container if not dropped on a dropzone
-                    endingsContainer.appendChild(touchDraggedElement);
-                    touchDraggedElement.classList.remove('hide');
-                }
-
-                touchDraggedElement = null;
-                currentDropzone = null;
-            }
-
-            function playSound(soundId) {
-                const sound = document.getElementById(soundId);
-                sound.currentTime = 0;
-                sound.play();
-            }
-
-            function checkAnswers() {
-                let allCorrect = true;
-                const dropzones = document.querySelectorAll('.dropzone');
-
-                dropzones.forEach(zone => {
-                    const row = zone.getAttribute('data-row');
-                    const col = zone.getAttribute('data-col');
-                    const correctEnding = correctAnswers[row][col];
-
-                    if (zone.firstChild) {
-                        const endingElement = zone.firstChild;
-                        const userEnding = endingElement.textContent.trim().toLowerCase();
-                        if (userEnding === correctEnding.toLowerCase()) {
-                            endingElement.classList.add('correct');
-                            playSound('correct-sound');
-                        } else {
-                            playSound('incorrect-sound');
-                            createExplosion(zone);
-                            endingsContainer.appendChild(endingElement);
-                            endingElement.classList.remove('correct');
-                            endingElement.classList.remove('hide');
-                            allCorrect = false;
-                        }
-                    } else {
-                        allCorrect = false;
-                    }
-                });
-
-                updateProgressBar();
-
-                if (allCorrect) {
-                    stopTimer();
-                    // Confetti effect
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-                    updateHighScore();
-                } else {
-                    if (!timerInterval) {
-                        startTimer();
-                    }
-                }
-            }
-
-            function updateProgressBar() {
-                const totalCells = document.querySelectorAll('.dropzone').length;
-                const correctCells = document.querySelectorAll('.ending.correct').length;
-                const progressPercent = (correctCells / totalCells) * 100;
-                document.getElementById('progress-bar').style.width = progressPercent + '%';
-
-                // Update feedback message
-                const feedbackMessage = document.getElementById('feedback-message');
-                if (progressPercent === 100) {
-                    feedbackMessage.textContent = "All correct! Well done!";
-                } else if (progressPercent >= 75) {
-                    feedbackMessage.textContent = "Almost there!";
-                } else if (progressPercent >= 50) {
-                    feedbackMessage.textContent = "You're halfway there!";
-                } else if (progressPercent > 0) {
-                    feedbackMessage.textContent = "Keep going!";
-                } else {
-                    feedbackMessage.textContent = "Let's get started!";
-                }
-            }
-
-            function createExplosion(zone) {
-                const rect = zone.getBoundingClientRect();
-                const pieceCount = 50; // Increased number of pieces
-                const container = document.createElement('div');
-                container.style.position = 'absolute';
-                container.style.left = '0';
-                container.style.top = '0';
-                container.style.width = '100%';
-                container.style.height = '100%';
-                container.style.pointerEvents = 'none';
-
-                for (let i = 0; i < pieceCount; i++) {
-                    const piece = document.createElement('div');
-                    piece.classList.add('explosion-piece');
-
-                    // Random size
-                    const size = Math.random() * 6 + 4; // Between 4px and 10px
-                    piece.style.width = size + 'px';
-                    piece.style.height = size + 'px';
-
-                    // Random shape
-                    if (Math.random() > 0.5) {
-                        piece.style.borderRadius = '50%'; // Circle
-                    } else {
-                        piece.style.borderRadius = '0%'; // Square
-                    }
-
-                    // Random color (shades of red, orange, yellow)
-                    const colors = ['#ff0000', '#ff4500', '#ff8c00', '#ffd700'];
-                    piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-
-                    // Position at center
-                    piece.style.left = rect.width / 2 + 'px';
-                    piece.style.top = rect.height / 2 + 'px';
-
-                    // Random angle and distance
-                    const angle = Math.random() * 2 * Math.PI;
-                    const distance = Math.random() * 100 + 50; // Increased distance
-                    const dx = Math.cos(angle) * distance + 'px';
-                    const dy = Math.sin(angle) * distance + 'px';
-                    piece.style.setProperty('--dx', dx);
-                    piece.style.setProperty('--dy', dy);
-
-                    // Random rotation
-                    const rotation = Math.random() * 720 - 360 + 'deg';
-                    piece.style.setProperty('--rotation', rotation);
-
-                    container.appendChild(piece);
-                }
-
-                zone.appendChild(container);
-
-                // Flash effect
-                const flash = document.createElement('div');
-                flash.classList.add('flash');
-                document.body.appendChild(flash);
-
-                // Remove the explosion pieces and flash after animation
-                setTimeout(() => {
-                    if (zone.contains(container)) {
-                        zone.removeChild(container);
-                    }
-                    document.body.removeChild(flash);
-                }, 1000); // Duration should match the explode animation duration
-            }
-
-            function getHighScore() {
-                let declensionKey = selectedDeclensions.join('_') + (isMobileVersion ? '_mobile' : '_desktop');
-                const highScoreData = localStorage.getItem('bestTime_' + declensionKey);
-                if (highScoreData) {
-                    const highScoreObj = JSON.parse(highScoreData);
-                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(highScoreObj.time)} (Declensions: ${highScoreObj.declensions.map(d => declensionLabels[d]).join(', ')}, Version: ${highScoreObj.version})`;
-                } else {
-                    document.getElementById('high-score').textContent = `Best Time: --`;
-                }
-            }
-
-            function updateHighScore() {
-                let declensionKey = selectedDeclensions.join('_') + (isMobileVersion ? '_mobile' : '_desktop');
-                const highScoreData = localStorage.getItem('bestTime_' + declensionKey);
-                if (!highScoreData || elapsedTime < JSON.parse(highScoreData).time) {
-                    const highScoreObj = {
-                        time: elapsedTime,
-                        declensions: selectedDeclensions,
-                        version: isMobileVersion ? 'Mobile' : 'Desktop'
-                    };
-                    localStorage.setItem('bestTime_' + declensionKey, JSON.stringify(highScoreObj));
-                    document.getElementById('high-score').textContent = `Best Time: ${formatTime(elapsedTime)} (Declensions: ${selectedDeclensions.map(d => declensionLabels[d]).join(', ')}, Version: ${highScoreObj.version})`;
-                    alert('New Best Time!');
-                }
-            }
-
-            function clearHighScore() {
-                let declensionKey = selectedDeclensions.join('_') + (isMobileVersion ? '_mobile' : '_desktop');
-                localStorage.removeItem('bestTime_' + declensionKey);
-                document.getElementById('high-score').textContent = `Best Time: --`;
-                alert('High Score Cleared!');
-            }
-
-            // Event listeners for buttons
-            document.getElementById('start-button').addEventListener('click', () => {
-                modal.style.display = 'block';
-            });
-            document.getElementById('check-button').addEventListener('click', checkAnswers);
-            document.getElementById('clear-high-score-button').addEventListener('click', clearHighScore); // New Event Listener
-
-            // Show the modal on page load
-            modal.style.display = 'block';
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const declensionLabels = ["1","2","2n","3","3n","4","4n","5"];
+      const caseClasses = ['case-nominative','case-genitive','case-dative','case-accusative','case-ablative','case-nominative','case-genitive','case-dative','case-accusative','case-ablative'];
+      const caseLabels = ['Nominative','Genitive','Dative','Accusative','Ablative','Nominative-P','Genitive-P','Dative-P','Accusative-P','Ablative-P'];
+      const fullCorrect = [["a","us/r","um","*","*","us","u","es"],["ae","i","i","is","is","us","us","ei"],["ae","o","o","i","i","ui","u","ei"],["am","um","um","em","*","um","u","em"],["a","o","o","e","e","u","u","e"],["ae","i","a","es","a","us","ua","es"],["arum","orum","orum","um","um","uum","uum","erum"],["is","is","is","ibus","ibus","ibus","ibus","ebus"],["as","os","a","es","a","us","ua","es"],["is","is","is","ibus","ibus","ibus","ibus","ebus"]];
+      let selectedDecls = [], correctAnswers = [], initialPool = [], shuffled = [], elapsed = 0, timerInterval = null;
+      const selContainer = document.getElementById('selection-container');
+      const gameContainer = document.getElementById('game-container');
+      const selStartBtn = document.getElementById('selection-start');
+      const timerEl = document.getElementById('timer');
+      const currentEl = document.getElementById('current-ending');
+      const tableHeader = document.getElementById('table-header');
+      const tableBody = document.getElementById('table-body');
+      const checkBtn = document.getElementById('check-button');
+      const restartBtn = document.getElementById('restart-button');
+
+      selStartBtn.addEventListener('click', () => {
+        selectedDecls = Array.from(document.querySelectorAll('input[name="declension"]:checked')).map(b => parseInt(b.value));
+        if (!selectedDecls.length) { alert('Select at least one declension'); return; }
+        selContainer.style.display='none'; gameContainer.style.display='block'; initialize();
+      });
+      restartBtn.addEventListener('click', () => { buildTable(); startGame(); });
+
+      function initialize() {
+        correctAnswers = fullCorrect.map(r => selectedDecls.map(c => r[c]));
+        initialPool = correctAnswers.flat();
+        buildTable(); startGame();
+      }
+
+      function buildTable() {
+        tableHeader.innerHTML='<th>Case</th>';
+        selectedDecls.forEach(c => { const th = document.createElement('th'); th.textContent=declensionLabels[c]; tableHeader.appendChild(th); });
+        tableBody.innerHTML='';
+        correctAnswers.forEach((row, ri) => {
+          const tr = document.createElement('tr'); tr.classList.add(caseClasses[ri]);
+          const th = document.createElement('th'); th.textContent=caseLabels[ri]; tr.appendChild(th);
+          row.forEach((_, ci) => { const td = document.createElement('td'); td.classList.add('dropzone'); td.dataset.row=ri; td.dataset.col=ci; td.addEventListener('dragover', e=>e.preventDefault()); td.addEventListener('drop', handleDrop); tr.appendChild(td); });
+          tableBody.appendChild(tr);
         });
-    </script>
+      }
+
+      function shuffle(a) { const arr=a.slice(); for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+
+      function startGame() {
+        shuffled = shuffle(initialPool);
+        clearInterval(timerInterval);
+        elapsed = 0;
+        updateTimer();
+        timerInterval = setInterval(() => { elapsed++; updateTimer(); },1000);
+        showNext();
+      }
+
+      function updateTimer() { const m=Math.floor(elapsed/60), s=elapsed%60; timerEl.textContent=`Time: ${m}m ${s}s`; }
+
+      function showNext() {
+        if (!shuffled.length) {
+          // no confetti here
+          currentEl.style.visibility='hidden';
+          return;
+        }
+        const cell=document.querySelector('td.dropzone'); if(cell){ const rect=cell.getBoundingClientRect(); currentEl.style.width=`${rect.width}px`; currentEl.style.height=`${rect.height}px`; }
+        const next = shuffled.shift(); currentEl.textContent=next; currentEl.style.visibility='visible';
+      }
+
+      currentEl.addEventListener('dragstart', e => { e.dataTransfer.setData('text/plain',currentEl.textContent); setTimeout(()=>currentEl.style.visibility='hidden',0); });
+      currentEl.addEventListener('dragend', e => { if (!e.dataTransfer.dropEffect||e.dataTransfer.dropEffect==='none') currentEl.style.visibility='visible'; });
+
+      function handleDrop(e) {
+        e.preventDefault();
+        const td = e.currentTarget;
+        const old = td.textContent.trim();
+        if (old) shuffled.push(old);
+        const val = e.dataTransfer.getData('text/plain');
+        td.textContent = val;
+        showNext();
+      }
+
+      function checkAnswers() {
+        const placed=[];
+        document.querySelectorAll('td.dropzone').forEach(z => {
+          const text=z.textContent.trim();
+          if (!text) return;
+          const r=z.dataset.row, c=z.dataset.col;
+          const corr=correctAnswers[r][c].toLowerCase();
+          if (text.toLowerCase()===corr) placed.push(text);
+          else z.textContent='';
+        });
+        const remaining=initialPool.slice();
+        placed.forEach(val => {
+          const idx=remaining.findIndex(item=>item.toLowerCase()===val.toLowerCase());
+          if(idx>=0) remaining.splice(idx,1);
+        });
+        shuffled=shuffle(remaining);
+        if (remaining.length===0) {
+          clearInterval(timerInterval);
+          confetti({particleCount:100,spread:70,origin:{y:0.6}});
+        }
+        showNext();
+      }
+
+      checkBtn.addEventListener('click', checkAnswers);
+    });
+  </script>
 </body>
 </html>
