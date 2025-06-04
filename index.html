@@ -86,7 +86,7 @@
       width: 100%;
       max-width: 800px;
       text-align: center;
-      position: relative; /* used for centering calculation */
+      position: relative; /* used for centering calculations */
     }
 
     /* ==== Draggable “bubble” ==== */
@@ -97,21 +97,21 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       cursor: grab;
       user-select: none;
-      touch-action: none; /* prevent default scrolling/zoom when touching */
-      position: fixed;     /* fixed to viewport */
+      touch-action: none; /* prevent default touch scrolling */
+      position: fixed;     /* fixed in the viewport */
       visibility: hidden;
       z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: none;    /* move instantly under the finger */
+      transition: none;    /* instant movement under finger */
     }
 
     /* ==== Table styling ==== */
     .declension-table {
       width: 90%;
       max-width: 800px;
-      margin: 0 auto 20px;
+      margin: 100px auto 20px; /* ← moved down 100px to create room */
     }
     table {
       width: 100%;
@@ -161,10 +161,10 @@
     <button id="check-button">Check Answers</button>
     <button id="restart-button">Restart</button>
 
-    <!-- The bubble that you drag -->
+    <!-- The bubble you drag -->
     <div id="current-ending"></div>
 
-    <!-- The declension table -->
+    <!-- The declension table (“chart”) -->
     <div class="declension-table">
       <table>
         <thead>
@@ -177,9 +177,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      //———————
-      // Part A: Data & References
-      //———————
+      //————— Part A: Data & References —————
       const declensionLabels = ["1","2","2n","3","3n","4","4n","5"];
       const caseClasses = [
         'case-nominative','case-genitive','case-dative','case-accusative','case-ablative',
@@ -189,7 +187,6 @@
         'Nominative','Genitive','Dative','Accusative','Ablative',
         'Nominative-P','Genitive-P','Dative-P','Accusative-P','Ablative-P'
       ];
-      // fullCorrect[row][col]
       const fullCorrect = [
         ["a","us/r","um","*","*","us","u","es"],
         ["ae","i","i","is","is","us","us","ei"],
@@ -204,8 +201,8 @@
       ];
 
       let selectedDecls = [];
-      let correctAnswers = [];  // [row][col]
-      let initialPool = [];     // flat array of all endings
+      let correctAnswers = [];
+      let initialPool = [];
       let shuffled = [];
       let elapsed = 0;
       let timerInterval = null;
@@ -223,9 +220,7 @@
       const checkBtn      = document.getElementById('check-button');
       const restartBtn    = document.getElementById('restart-button');
 
-      //———————
-      // Part B: Build Table & Start
-      //———————
+      //————— Part B: Build Table & Start —————
       selStartBtn.addEventListener('click', () => {
         selectedDecls = Array.from(document.querySelectorAll('input[name="declension"]:checked'))
                               .map(cb => parseInt(cb.value));
@@ -244,7 +239,6 @@
       });
 
       function initialize() {
-        // Build correctAnswers[][] for chosen declensions
         correctAnswers = fullCorrect.map(row =>
           selectedDecls.map(colIdx => row[colIdx])
         );
@@ -254,7 +248,6 @@
       }
 
       function buildTable() {
-        // Header
         tableHeader.innerHTML = '<th>Case</th>';
         selectedDecls.forEach(colIdx => {
           const th = document.createElement('th');
@@ -262,7 +255,6 @@
           tableHeader.appendChild(th);
         });
 
-        // Body
         tableBody.innerHTML = '';
         correctAnswers.forEach((rowArr, r) => {
           const tr = document.createElement('tr');
@@ -309,9 +301,7 @@
         timerEl.textContent = `Time: ${m}m ${s}s`;
       }
 
-      //———————
-      // Part C: showNext (always center beneath the buttons)
-      //———————
+      //————— Part C: showNext, Centered Between Buttons & Table —————
       function showNext() {
         if (!shuffled.length) {
           currentEl.style.visibility = 'hidden';
@@ -321,7 +311,7 @@
         currentEl.textContent = nextVal;
         currentEl.style.visibility = 'visible';
 
-        // Size bubble to match a table cell
+        // 1) Size bubble to match a drop cell
         const anyCell = document.querySelector('td.dropzone');
         if (anyCell) {
           const rect = anyCell.getBoundingClientRect();
@@ -329,32 +319,27 @@
           currentEl.style.height = `${rect.height}px`;
         }
 
-        // Compute new fixed‐position left/top so bubble is:
-        //    – horizontally centered over gameContainer
-        //    – vertically just below the buttons
-        const gcRect = gameContainer.getBoundingClientRect();
+        // 2) Horizontal: center over game-container
+        const gcRect     = gameContainer.getBoundingClientRect();
         const bubbleRect = currentEl.getBoundingClientRect();
-
-        // 1) Horizontal: center within gameContainer’s viewport span
-        const newLeft = gcRect.left + (gcRect.width - bubbleRect.width) / 2;
+        const newLeft    = gcRect.left + (gcRect.width - bubbleRect.width) / 2;
         currentEl.style.left = `${newLeft}px`;
 
-        // 2) Vertical: take the bottom of the “Check” button row + 10px
-        //    We assume "checkBtn" and "restartBtn" share a horizontal row.
-        const buttonsRect = checkBtn.getBoundingClientRect();
-        const belowBtnsY = buttonsRect.bottom + 10;
-        currentEl.style.top = `${belowBtnsY}px`;
+        // 3) Vertical: find bottom of buttons and top of table, then center bubble in between
+        const buttonsBottom = checkBtn.getBoundingClientRect().bottom;
+        const tableTop      = document.querySelector('.declension-table').getBoundingClientRect().top;
+        const bubbleHeight  = bubbleRect.height;
+        const gap           = tableTop - buttonsBottom;
+        const newTop        = buttonsBottom + ((gap - bubbleHeight) / 2);
+        currentEl.style.top = `${newTop}px`;
       }
 
-      //———————
-      // Part D: Pointer/Touch Drag
-      //———————
+      //————— Part D: Pointer/Touch Drag —————
       currentEl.addEventListener('pointerdown', (evt) => {
         evt.preventDefault();
         isDragging = true;
         currentEl.style.cursor = 'grabbing';
 
-        // record offset inside the bubble
         const rect = currentEl.getBoundingClientRect();
         dragOffsetX = evt.clientX - rect.left;
         dragOffsetY = evt.clientY - rect.top;
@@ -378,7 +363,6 @@
         currentEl.style.cursor = 'grab';
         currentEl.style.zIndex = 1000;
 
-        // Identify what’s under the finger at that moment
         const dropX = evt.clientX;
         const dropY = evt.clientY;
 
@@ -388,11 +372,10 @@
 
         if (eltBelow && eltBelow.classList.contains('dropzone')) {
           const td = eltBelow;
-          const r = parseInt(td.dataset.row, 10);
-          const c = parseInt(td.dataset.col, 10);
+          const r  = parseInt(td.dataset.row, 10);
+          const c  = parseInt(td.dataset.col, 10);
           const val = currentEl.textContent.trim();
 
-          // if cell already had something, return it to the pool
           const old = td.textContent.trim();
           if (old) {
             shuffled.push(old);
@@ -400,14 +383,11 @@
           td.textContent = val;
           showNext();
         } else {
-          // missed or released off‐cell → just show next
           showNext();
         }
       });
 
-      //———————
-      // Part E: Check Answers
-      //———————
+      //————— Part E: Check Answers —————
       function checkAnswers() {
         const placed = [];
         document.querySelectorAll('td.dropzone').forEach(td => {
