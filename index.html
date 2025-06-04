@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Latin Declension Drag & Drop Practice</title>
+  <title>Latin Declension Drag &amp; Drop Practice</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
   <style>
@@ -17,17 +17,21 @@
       --blue: #3498db;
       --pink: #fd79a8;
     }
-    *, *::before, *::after { box-sizing: border-box; }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Cinzel', serif;
       background: var(--light-blue);
-      margin: 0;
-      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 20px;
     }
-    h1 { color: var(--royal-blue); text-align: center; margin-bottom: 10px; }
+    h1 {
+      color: var(--royal-blue);
+      text-align: center;
+      margin-bottom: 10px;
+    }
 
     /* ==== Selection Panel ==== */
     .panel {
@@ -39,8 +43,15 @@
       max-width: 400px;
       margin-bottom: 20px;
     }
-    .panel h2 { margin-top: 0; text-align: center; }
-    .panel label { display: block; margin: 8px 0; font-size: 1rem; }
+    .panel h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    .panel label {
+      display: block;
+      margin: 8px 0;
+      font-size: 1rem;
+    }
     button {
       font-family: inherit;
       font-weight: 600;
@@ -53,9 +64,17 @@
       transition: background .2s;
       margin: 5px;
     }
-    button:hover { background: #27408B; }
-    #timer { font-size: 1.2rem; margin-bottom: 10px; }
-    #check-button, #restart-button { margin-bottom: 10px; }
+    button:hover {
+      background: #27408B;
+    }
+    #timer {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    #check-button, #restart-button {
+      margin-bottom: 10px;
+    }
 
     /* ==== Game Container ==== */
     #game-container {
@@ -63,10 +82,10 @@
       width: 100%;
       max-width: 800px;
       text-align: center;
-      position: relative; /* Make this container the reference for absolute positioning */
+      /* We no longer need it as positioning reference for the bubble */
     }
 
-    /* ==== The draggable ending “ball” ==== */
+    /* ==== Draggable “bubble” ==== */
     #current-ending {
       background: var(--white);
       border: 2px solid var(--royal-blue);
@@ -74,23 +93,33 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       cursor: grab;
       user-select: none;
-      transition: transform .2s;
+      /* Prevent default touch-scrolling/zoom on this element */
+      touch-action: none;
+
+      /* ===== FIXED positioning in viewport ===== */
+      position: fixed;
+      left: 50%;   /* will adjust via JS on showNext() */
+      top: 100px;  /* initial top offset; overwritten by JS if needed */
+      transform: translateX(-50%);
+      visibility: hidden;
+      z-index: 1000;
       display: flex;
       align-items: center;
       justify-content: center;
-      visibility: hidden;
-
-      /* NEW: absolute positioning so we can move it under the finger */
-      position: absolute;
-      top: 0;    /* We’ll programmatically set “left/top” each time we show it */
-      left: 50%; /* Center horizontally on start (will be updated) */
-      transform: translateX(-50%); /* Centering shift */
-      z-index: 10; /* Draw above table */
+      transition: none; /* remove any transition so it moves exactly under the finger */
     }
 
     /* ==== Table styling ==== */
-    .declension-table { width: 90%; max-width: 800px; margin-bottom: 20px; }
-    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .declension-table {
+      width: 90%;
+      max-width: 800px;
+      margin: 0 auto 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
     th, td {
       border: 1px solid #aaa;
       text-align: center;
@@ -99,12 +128,12 @@
       height: 50px;
       overflow: hidden;
     }
-    .case-nominative th { background: var(--red); color: #fff; }
-    .case-genitive th   { background: var(--green); color: #fff; }
-    .case-dative th     { background: var(--orange); color: #000; }
-    .case-accusative th { background: var(--blue); color: #fff; }
-    .case-ablative th   { background: var(--pink); color: #000; }
-    .dropzone.drag-over { background: var(--gray-light); }
+    .case-nominative th   { background: var(--red); color: #fff; }
+    .case-genitive th     { background: var(--green); color: #fff; }
+    .case-dative th       { background: var(--orange); color: #000; }
+    .case-accusative th   { background: var(--blue); color: #fff; }
+    .case-ablative th     { background: var(--pink); color: #000; }
+    .dropzone.drag-over   { background: var(--gray-light); }
   </style>
 </head>
 <body>
@@ -134,10 +163,10 @@
     <button id="check-button">Check Answers</button>
     <button id="restart-button">Restart</button>
 
-    <!-- This is the “draggable” ending bubble -->
+    <!-- The “bubble” we drag -->
     <div id="current-ending"></div>
 
-    <!-- The table where students drop endings -->
+    <!-- The declension table -->
     <div class="declension-table">
       <table>
         <thead>
@@ -150,9 +179,9 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      //—-------------------------------------------------------------------------
-      // PART A: Data & Element References
-      //—-------------------------------------------------------------------------
+      //————————————
+      // Part A: Data & Elements
+      //————————————
       const declensionLabels = ["1","2","2n","3","3n","4","4n","5"];
       const caseClasses = [
         'case-nominative','case-genitive','case-dative','case-accusative','case-ablative',
@@ -162,8 +191,7 @@
         'Nominative','Genitive','Dative','Accusative','Ablative',
         'Nominative-P','Genitive-P','Dative-P','Accusative-P','Ablative-P'
       ];
-
-      // fullCorrect[r][c] = correct ending for row r, declension index c.
+      // fullCorrect[row][col] = ending string
       const fullCorrect = [
         ["a","us/r","um","*","*","us","u","es"],
         ["ae","i","i","is","is","us","us","ei"],
@@ -178,15 +206,18 @@
       ];
 
       let selectedDecls = [];
-      let correctAnswers = [];   // 2D array: correctAnswers[row][col]
-      let initialPool = [];      // flat array of all endings for the chosen declensions
-      let shuffled = [];         // pool we shuffle & consume
+      let correctAnswers = [];   // 2D array [row][col]
+      let initialPool = [];      // flat array of all endings chosen
+      let shuffled = [];         // pool we shuffle & pull from
       let elapsed = 0;
       let timerInterval = null;
-      let isDragging = false;
-      let dragOffsetX = 0, dragOffsetY = 0;
 
-      // Element references
+      // Drag state:
+      let isDragging   = false;
+      let dragOffsetX  = 0;
+      let dragOffsetY  = 0;
+
+      // Element refs:
       const selContainer  = document.getElementById('selection-container');
       const gameContainer = document.getElementById('game-container');
       const selStartBtn   = document.getElementById('selection-start');
@@ -197,12 +228,12 @@
       const checkBtn      = document.getElementById('check-button');
       const restartBtn    = document.getElementById('restart-button');
 
-      //—-------------------------------------------------------------------------
-      // PART B: Initialization & Table Construction
-      //—-------------------------------------------------------------------------
+      //————————————
+      // Part B: Build Table & Start
+      //————————————
       selStartBtn.addEventListener('click', () => {
         selectedDecls = Array.from(document.querySelectorAll('input[name="declension"]:checked'))
-                              .map(b => parseInt(b.value));
+                              .map(cb => parseInt(cb.value));
         if (!selectedDecls.length) {
           alert('Select at least one declension');
           return;
@@ -218,39 +249,40 @@
       });
 
       function initialize() {
-        // Build a 2D array of correct answers only for chosen declensions
+        // Build correctAnswers[][] only for the chosen declensions
         correctAnswers = fullCorrect.map(row =>
-          selectedDecls.map(colIndex => row[colIndex])
+          selectedDecls.map(colIdx => row[colIdx])
         );
-        // Flatten into a single pool
+        // Flatten into one pool
         initialPool = correctAnswers.flat();
         buildTable();
         startGame();
       }
 
       function buildTable() {
+        // Header row
         tableHeader.innerHTML = '<th>Case</th>';
-        selectedDecls.forEach(ci => {
+        selectedDecls.forEach(colIdx => {
           const th = document.createElement('th');
-          th.textContent = declensionLabels[ci];
+          th.textContent = declensionLabels[colIdx];
           tableHeader.appendChild(th);
         });
 
+        // Body rows
         tableBody.innerHTML = '';
-        correctAnswers.forEach((row, rowIndex) => {
+        correctAnswers.forEach((rowArr, r) => {
           const tr = document.createElement('tr');
-          tr.classList.add(caseClasses[rowIndex]);
+          tr.classList.add(caseClasses[r]);
 
           const th = document.createElement('th');
-          th.textContent = caseLabels[rowIndex];
+          th.textContent = caseLabels[r];
           tr.appendChild(th);
 
-          row.forEach((_, colIndex) => {
+          rowArr.forEach((_, c) => {
             const td = document.createElement('td');
             td.classList.add('dropzone');
-            td.dataset.row = rowIndex;
-            td.dataset.col = colIndex;
-            // We’ll handle pointer events instead of HTML5 DnD
+            td.dataset.row = r;
+            td.dataset.col = c;
             tr.appendChild(td);
           });
           tableBody.appendChild(tr);
@@ -258,12 +290,12 @@
       }
 
       function shuffle(arr) {
-        const a = arr.slice();
-        for (let i = a.length - 1; i > 0; i--) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
+          [copy[i], copy[j]] = [copy[j], copy[i]];
         }
-        return a;
+        return copy;
       }
 
       function startGame() {
@@ -283,8 +315,12 @@
         timerEl.textContent = `Time: ${m}m ${s}s`;
       }
 
+      //————————————
+      // Part C: Show Next & Position Bubble
+      //————————————
       function showNext() {
         if (!shuffled.length) {
+          // No more endings → hide bubble
           currentEl.style.visibility = 'hidden';
           return;
         }
@@ -292,133 +328,120 @@
         currentEl.textContent = nextVal;
         currentEl.style.visibility = 'visible';
 
-        // After we set textContent, measure the visible cell size (optional)
-        const someCell = document.querySelector('td.dropzone');
-        if (someCell) {
-          const rect = someCell.getBoundingClientRect();
+        // Size bubble to match any drop cell
+        const anyCell = document.querySelector('td.dropzone');
+        if (anyCell) {
+          const rect = anyCell.getBoundingClientRect();
           currentEl.style.width  = `${rect.width}px`;
           currentEl.style.height = `${rect.height}px`;
         }
 
-        // Place it back in the middle (horizontally) at the top of game-container
-        const gcRect = gameContainer.getBoundingClientRect();
-        const elRect = currentEl.getBoundingClientRect();
-        // Left: center within gameContainer
-        currentEl.style.left = `${(gcRect.width / 2) - (elRect.width / 2)}px`;
-        // Top: maybe 20px below the top of gameContainer
-        currentEl.style.top  = `20px`;
+        // Place bubble back at the top center of viewport (fixed)
+        const bubbleRect = currentEl.getBoundingClientRect();
+        // left: 50% of viewport minus half bubble width
+        const viewportWidth = window.innerWidth;
+        const newLeft = (viewportWidth / 2) - (bubbleRect.width / 2);
+        currentEl.style.left = `${newLeft}px`;
+
+        // top: 100px down from top of viewport (feel free to adjust)
+        currentEl.style.top = `100px`;
       }
 
-      //—-------------------------------------------------------------------------
-      // PART C: Pointer/Touch Drag & Drop Logic
-      //—-------------------------------------------------------------------------
-
-      // When user touches (or clicks) the #current-ending bubble:
+      //————————————
+      // Part D: Pointer/Touch Dragging
+      //————————————
+      // When user touches or clicks the bubble:
       currentEl.addEventListener('pointerdown', (evt) => {
         evt.preventDefault();
         isDragging = true;
         currentEl.style.cursor = 'grabbing';
 
-        // Compute offset: where inside the bubble did you touch?
+        // Compute offset between pointer and bubble’s top-left
         const rect = currentEl.getBoundingClientRect();
         dragOffsetX = evt.clientX - rect.left;
         dragOffsetY = evt.clientY - rect.top;
 
-        // Bring it to the front
-        currentEl.style.zIndex = 999;
+        // Make sure it's on top
+        currentEl.style.zIndex = 2000;
       });
 
-      // As the user moves finger/mouse with pointer down:
+      // While user moves finger/mouse:
       document.addEventListener('pointermove', (evt) => {
         if (!isDragging) return;
         evt.preventDefault();
-        const parentRect = gameContainer.getBoundingClientRect();
 
-        // Compute new left/top relative to gameContainer
-        let newLeft = evt.clientX - parentRect.left - dragOffsetX;
-        let newTop  = evt.clientY - parentRect.top  - dragOffsetY;
-
-        // Optional: constrain within container bounds
-        const bubbleRect = currentEl.getBoundingClientRect();
-        const maxX = parentRect.width  - bubbleRect.width;
-        const maxY = parentRect.height - bubbleRect.height;
-        if (newLeft < 0) newLeft = 0;
-        if (newLeft > maxX) newLeft = maxX;
-        if (newTop < 0)  newTop = 0;
-        if (newTop > maxY) newTop = maxY;
-
+        // Move bubble so it’s under the finger exactly
+        const newLeft = evt.clientX - dragOffsetX;
+        const newTop  = evt.clientY - dragOffsetY;
         currentEl.style.left = `${newLeft}px`;
         currentEl.style.top  = `${newTop}px`;
       });
 
-      // On pointerup: we “drop” the bubble
+      // On release:
       document.addEventListener('pointerup', (evt) => {
         if (!isDragging) return;
         isDragging = false;
         currentEl.style.cursor = 'grab';
+        currentEl.style.zIndex = 1000;
 
-        // Which element is directly under the finger now?
+        // Detect where the finger is
         const dropX = evt.clientX;
         const dropY = evt.clientY;
-        currentEl.style.zIndex = 10; // Reset z-index
 
-        // Hide the bubble temporarily so elementFromPoint isn’t “blocked” by it
+        // Temporarily hide bubble so elementFromPoint sees the cell below
         currentEl.style.visibility = 'hidden';
-        const elemUnder = document.elementFromPoint(dropX, dropY);
-        // Restore visibility immediately
+        const elementBelow = document.elementFromPoint(dropX, dropY);
         currentEl.style.visibility = 'visible';
 
-        // If it’s a <td class="dropzone">, we place the text there:
-        if (elemUnder && elemUnder.classList.contains('dropzone')) {
-          const td = elemUnder;
+        // If it’s a dropzone, place the ending there
+        if (elementBelow && elementBelow.classList.contains('dropzone')) {
+          const td = elementBelow;
           const r = parseInt(td.dataset.row, 10);
           const c = parseInt(td.dataset.col, 10);
-          const attemptedVal = currentEl.textContent.trim();
+          const attempted = currentEl.textContent.trim();
 
-          // If there was already something in that cell, put it back into the pool
+          // If something was already in that cell, put it back into the pool
           const oldText = td.textContent.trim();
           if (oldText) {
             shuffled.push(oldText);
           }
-          td.textContent = attemptedVal;
-          // Now we show the next bubble
+
+          td.textContent = attempted;
           showNext();
         } else {
-          // Not dropped on a dropzone → snap back to original position (in the center top)
+          // Not dropped in a cell → just show the next bubble anyway
           showNext();
         }
       });
 
-      //—-------------------------------------------------------------------------
-      // PART D: Checking Answers & Confetti
-      //—-------------------------------------------------------------------------
-
+      //————————————
+      // Part E: Checking Answers & Confetti
+      //————————————
       function checkAnswers() {
         const placed = [];
-        document.querySelectorAll('td.dropzone').forEach(z => {
-          const text = z.textContent.trim();
-          if (!text) return;
-          const r = parseInt(z.dataset.row, 10);
-          const c = parseInt(z.dataset.col, 10);
-          const corr = correctAnswers[r][c].toLowerCase();
-          if (text.toLowerCase() === corr) {
-            placed.push(text);
+        document.querySelectorAll('td.dropzone').forEach(td => {
+          const txt = td.textContent.trim();
+          if (!txt) return;
+          const r = parseInt(td.dataset.row, 10);
+          const c = parseInt(td.dataset.col, 10);
+          const correct = correctAnswers[r][c].toLowerCase();
+          if (txt.toLowerCase() === correct) {
+            placed.push(txt);
           } else {
-            // Wrong answer → remove it immediately
-            z.textContent = '';
+            // Wrong answer → clear immediately
+            td.textContent = '';
           }
         });
 
-        // Rebuild the pool from any correct ones (so they don’t reappear) vs. incorrect
-        const remaining = initialPool.slice();
+        // Remove all correctly placed endings from the pool
+        const remainder = initialPool.slice();
         placed.forEach(val => {
-          const idx = remaining.findIndex(item => item.toLowerCase() === val.toLowerCase());
-          if (idx >= 0) remaining.splice(idx, 1);
+          const idx = remainder.findIndex(item => item.toLowerCase() === val.toLowerCase());
+          if (idx >= 0) remainder.splice(idx, 1);
         });
-        shuffled = shuffle(remaining);
 
-        // If everything is correct/placed → celebrate
-        if (remaining.length === 0) {
+        shuffled = shuffle(remainder);
+        if (remainder.length === 0) {
           clearInterval(timerInterval);
           confetti({
             particleCount: 100,
@@ -430,10 +453,6 @@
       }
 
       checkBtn.addEventListener('click', checkAnswers);
-
-      //—-------------------------------------------------------------------------
-      // END of Script
-      //—-------------------------------------------------------------------------
     });
   </script>
 </body>
